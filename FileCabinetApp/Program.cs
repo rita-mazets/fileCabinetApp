@@ -144,7 +144,7 @@ namespace FileCabinetApp
             char type = typeString[0];
 
             var result = Program.fileCabinetService.CreateRecord(firstName, lastName, date, height, salary, type);
-            Console.WriteLine($"Record #{result} is created.");
+            Console.WriteLine($"Record #{result} is created./n");
         }
 
         private static void List(string parameters)
