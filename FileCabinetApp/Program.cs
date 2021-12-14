@@ -117,8 +117,10 @@ namespace FileCabinetApp
         {
             Console.Write("First name:");
             var firstName = Console.ReadLine();
+
             Console.Write("Last name:");
             string lastName = Console.ReadLine();
+
             DateTime date;
             string dateString;
 
@@ -129,7 +131,19 @@ namespace FileCabinetApp
             }
             while (!DateTime.TryParseExact(dateString, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.AssumeLocal, out date));
 
-            var result = Program.fileCabinetService.CreateRecord(firstName, lastName, date);
+            Console.Write("Height:");
+            short height;
+            _ = short.TryParse(Console.ReadLine(), out height);
+
+            Console.Write("Salary:");
+            decimal salary;
+            _ = decimal.TryParse(Console.ReadLine(), out salary);
+
+            Console.Write("Type:");
+            string typeString = Console.ReadLine();
+            char type = typeString[0];
+
+            var result = Program.fileCabinetService.CreateRecord(firstName, lastName, date, height, salary, type);
             Console.WriteLine($"Record #{result} is created.");
         }
 
@@ -138,7 +152,7 @@ namespace FileCabinetApp
             var records = fileCabinetService.GetRecords();
             foreach (var record in records)
             {
-                Console.WriteLine($"#{record.Id}, {record.FirstName}, {record.LastName}, {record.DateOfBirth:yyyy-MMM-dd)}");
+                Console.WriteLine($"#{record.Id}, {record.FirstName}, {record.LastName}, {record.DateOfBirth:yyyy-MMM-dd)}, {record.Height}, {record.Salary}, {record.Type}");
             }
         }
     }
