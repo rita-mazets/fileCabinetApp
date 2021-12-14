@@ -22,6 +22,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("exit", Exit),
             new Tuple<string, Action<string>>("stat", Stat),
             new Tuple<string, Action<string>>("create", Create),
+            new Tuple<string, Action<string>>("list", List),
         };
 
         private static string[][] helpMessages = new string[][]
@@ -29,7 +30,8 @@ namespace FileCabinetApp
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
             new string[] { "stat", "prints the amount of data in the service", "The 'stat' command print the amount of data in the service " },
-            new string[] { "create", "creates new record", "The 'create' command create new record " },
+            new string[] { "create", "creates new record", "The 'create' command creates new record " },
+            new string[] { "list", "prints all records", "The 'list' command prints all records " },
         };
 
         public static void Main(string[] args)
@@ -129,6 +131,15 @@ namespace FileCabinetApp
 
             var result = Program.fileCabinetService.CreateRecord(firstName, lastName, date);
             Console.WriteLine($"Record #{result} is created.");
+        }
+
+        private static void List(string parameters)
+        {
+            var records = fileCabinetService.GetRecords();
+            foreach (var record in records)
+            {
+                Console.WriteLine($"#{record.Id}, {record.FirstName}, {record.LastName}, {record.DateOfBirth:yyyy-MMM-dd)}");
+            }
         }
     }
 }
