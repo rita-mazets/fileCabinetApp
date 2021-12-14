@@ -115,33 +115,52 @@ namespace FileCabinetApp
 
         private static void Create(string parameters)
         {
-            Console.Write("First name:");
-            var firstName = Console.ReadLine();
-
-            Console.Write("Last name:");
-            string lastName = Console.ReadLine();
-
+            string firstName, lastName, dateString, typeString;
             DateTime date;
-            string dateString;
+            short height;
+            decimal salary;
+            char type;
+
+            do
+            {
+                Console.Write("First name:");
+                firstName = Console.ReadLine();
+            }
+            while (string.IsNullOrWhiteSpace(firstName) || firstName.Length < 2 || firstName.Length > 60);
+
+            do
+            {
+                Console.Write("Last name:");
+                lastName = Console.ReadLine();
+            }
+            while (string.IsNullOrWhiteSpace(lastName) || lastName.Length < 2 || lastName.Length > 60);
 
             do
             {
                 Console.Write("Date of birth:");
                 dateString = Console.ReadLine();
             }
-            while (!DateTime.TryParseExact(dateString, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.AssumeLocal, out date));
+            while (!DateTime.TryParseExact(dateString, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.AssumeLocal, out date) || date < new DateTime(1950, 1, 1) || date > DateTime.Now);
 
-            Console.Write("Height:");
-            short height;
-            _ = short.TryParse(Console.ReadLine(), out height);
+            do
+            {
+                Console.Write("Height:");
+            }
+            while (!short.TryParse(Console.ReadLine(), out height) || height < 0 || height > 250);
 
-            Console.Write("Salary:");
-            decimal salary;
-            _ = decimal.TryParse(Console.ReadLine(), out salary);
+            do
+            {
+                Console.Write("Salary:");
+            }
+            while (!decimal.TryParse(Console.ReadLine(), out salary) || salary < 0);
 
-            Console.Write("Type:");
-            string typeString = Console.ReadLine();
-            char type = typeString[0];
+            do
+            {
+                Console.Write("Type:");
+                typeString = Console.ReadLine();
+                type = typeString[0];
+            }
+            while (!char.IsLetter(type));
 
             var result = Program.fileCabinetService.CreateRecord(firstName, lastName, date, height, salary, type);
             Console.WriteLine($"Record #{result} is created./n");
