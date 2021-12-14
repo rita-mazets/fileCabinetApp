@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Globalization;
+using FileCabinetApp;
 
 namespace FileCabinetApp
 {
@@ -12,16 +14,22 @@ namespace FileCabinetApp
 
         private static bool isRunning = true;
 
+        private static FileCabinetService fileCabinetService = new FileCabinetService();
+
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
         {
             new Tuple<string, Action<string>>("help", PrintHelp),
             new Tuple<string, Action<string>>("exit", Exit),
+            new Tuple<string, Action<string>>("stat", Stat),
+            new Tuple<string, Action<string>>("create", Create),
         };
 
         private static string[][] helpMessages = new string[][]
         {
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
+            new string[] { "stat", "prints the amount of data in the service", "The 'stat' command print the amount of data in the service " },
+            new string[] { "create", "creates new record", "The 'create' command create new record " },
         };
 
         public static void Main(string[] args)
@@ -95,6 +103,32 @@ namespace FileCabinetApp
         {
             Console.WriteLine("Exiting an application...");
             isRunning = false;
+        }
+
+        private static void Stat(string parameters)
+        {
+            var recordsCount = Program.fileCabinetService.GetStat();
+            Console.WriteLine($"{recordsCount} record(s).");
+        }
+
+        private static void Create(string parameters)
+        {
+            Console.Write("First name:");
+            var firstName = Console.ReadLine();
+            Console.Write("Last name:");
+            string lastName = Console.ReadLine();
+            DateTime date;
+            string dateString;
+
+            do
+            {
+                Console.Write("Date of birth:");
+                dateString = Console.ReadLine();
+            }
+            while (!DateTime.TryParseExact(dateString, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.AssumeLocal, out date));
+
+            var result = Program.fileCabinetService.CreateRecord(firstName, lastName, date);
+            Console.WriteLine($"Record #{result} is created.");
         }
     }
 }
