@@ -60,5 +60,29 @@ namespace FileCabinetApp
         {
             return this.list.Count;
         }
+
+        public void EditRecord(int id, string firstName, string lastName, DateTime dateOfBirth, short heigth, decimal salary, char type)
+        {
+            bool isExist = false;
+            for (int i = 0; i < this.list.Count; i++)
+            {
+                if (this.list[i].Id == id)
+                {
+                    this.list[i].FirstName = firstName;
+                    this.list[i].LastName = lastName;
+                    this.list[i].DateOfBirth = dateOfBirth;
+                    this.list[i].Type = type;
+                    this.list[i].Salary = salary;
+                    this.list[i].Height = heigth;
+                    isExist = true;
+                    break;
+                }
+            }
+
+            if (!isExist)
+            {
+                throw new ArgumentException("id record is not found", nameof(id));
+            }
+        }
     }
 }

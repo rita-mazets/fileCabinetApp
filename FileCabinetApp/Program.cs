@@ -23,15 +23,17 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("stat", Stat),
             new Tuple<string, Action<string>>("create", Create),
             new Tuple<string, Action<string>>("list", List),
+            new Tuple<string, Action<string>>("edit", Edit),
         };
 
         private static string[][] helpMessages = new string[][]
         {
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
-            new string[] { "stat", "prints the amount of data in the service", "The 'stat' command print the amount of data in the service " },
-            new string[] { "create", "creates new record", "The 'create' command creates new record " },
-            new string[] { "list", "prints all records", "The 'list' command prints all records " },
+            new string[] { "stat", "prints the amount of data in the service", "The 'stat' command print the amount of data in the service. " },
+            new string[] { "create", "creates new record", "The 'create' command creates new record. " },
+            new string[] { "list", "prints all records", "The 'list' command prints all records. " },
+            new string[] { "edit", "allows to edit record ", "The 'list' command allows to edit record. " },
         };
 
         public static void Main(string[] args)
@@ -115,12 +117,21 @@ namespace FileCabinetApp
 
         private static void Create(string parameters)
         {
-            string firstName, lastName, dateString, typeString;
+            string firstName, lastName;
             DateTime date;
             short height;
             decimal salary;
             char type;
 
+            Program.Input(out firstName, out lastName, out date, out height, out salary, out type);
+
+            var result = Program.fileCabinetService.CreateRecord(firstName, lastName, date, height, salary, type);
+            Console.WriteLine($"Record #{result} is created.\n");
+        }
+
+        private static void Input(out string firstName, out string lastName, out DateTime date, out short height, out decimal salary, out char type)
+        {
+            string dateString, typeString;
             do
             {
                 Console.Write("First name:");
@@ -161,9 +172,6 @@ namespace FileCabinetApp
                 type = typeString[0];
             }
             while (!char.IsLetter(type));
-
-            var result = Program.fileCabinetService.CreateRecord(firstName, lastName, date, height, salary, type);
-            Console.WriteLine($"Record #{result} is created./n");
         }
 
         private static void List(string parameters)
@@ -171,7 +179,34 @@ namespace FileCabinetApp
             var records = fileCabinetService.GetRecords();
             foreach (var record in records)
             {
-                Console.WriteLine($"#{record.Id}, {record.FirstName}, {record.LastName}, {record.DateOfBirth:yyyy-MMM-dd)}, {record.Height}, {record.Salary}, {record.Type}");
+                Console.WriteLine($"#{record.Id}, {record.FirstName}, {record.LastName}, {record.DateOfBirth:yyyy-MMM-dd}, {record.Height}, {record.Salary}, {record.Type}");
+            }
+        }
+
+        private static void Edit(string parameters)
+        {
+            string firstName, lastName;
+            DateTime date;
+            short height;
+            decimal salary;
+            char type;
+            int id;
+
+            do
+            {
+                Console.Write("Id:");
+            }
+            while (!int.TryParse(Console.ReadLine(), out id));
+
+            Program.Input(out firstName, out lastName, out date, out height, out salary, out type);
+            try
+            {
+                Program.fileCabinetService.EditRecord(id, firstName, lastName, date, height, salary, type);
+                Console.WriteLine($"Record #{id} is updated.");
+            }
+            catch (ArgumentException)
+            {
+                Console.WriteLine($"#{id} record is not found.");
             }
         }
     }
