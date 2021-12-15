@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -83,6 +84,17 @@ namespace FileCabinetApp
             {
                 throw new ArgumentException("id record is not found", nameof(id));
             }
+        }
+
+        public FileCabinetRecord[] FindByFirstName(string firstName)
+        {
+            if (string.IsNullOrEmpty(firstName))
+            {
+                throw new ArgumentException("incorrect firstName", nameof(firstName));
+            }
+
+            firstName = firstName.ToLower(CultureInfo.CurrentCulture);
+            return this.list.Where(i => i.FirstName.ToLower(CultureInfo.CurrentCulture) == firstName).ToArray();
         }
     }
 }
