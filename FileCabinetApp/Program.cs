@@ -119,61 +119,59 @@ namespace FileCabinetApp
 
         private static void Create(string parameters)
         {
+            try
+            {
+                var fileCabinetRecord = Program.Input();
+                var result = Program.fileCabinetService.CreateRecord(fileCabinetRecord);
+                Console.WriteLine($"Record #{result} is created.\n");
+            }
+            catch (ArgumentException)
+            {
+                Console.WriteLine("Plase, input data again!");
+                Program.Create(parameters);
+            }
+            
+        }
+
+        private static FileCabinetRecord Input()
+        {
+            string dateString, typeString;
             string firstName, lastName;
             DateTime date;
             short height;
             decimal salary;
             char type;
 
-            Program.Input(out firstName, out lastName, out date, out height, out salary, out type);
+            Console.Write("First name:");
+            firstName = Console.ReadLine();
 
-            var result = Program.fileCabinetService.CreateRecord(firstName, lastName, date, height, salary, type);
-            Console.WriteLine($"Record #{result} is created.\n");
-        }
-
-        private static void Input(out string firstName, out string lastName, out DateTime date, out short height, out decimal salary, out char type)
-        {
-            string dateString, typeString;
-            do
-            {
-                Console.Write("First name:");
-                firstName = Console.ReadLine();
-            }
-            while (string.IsNullOrWhiteSpace(firstName) || firstName.Length < 2 || firstName.Length > 60);
-
-            do
-            {
-                Console.Write("Last name:");
-                lastName = Console.ReadLine();
-            }
-            while (string.IsNullOrWhiteSpace(lastName) || lastName.Length < 2 || lastName.Length > 60);
+            Console.Write("Last name:");
+            lastName = Console.ReadLine();
 
             do
             {
                 Console.Write("Date of birth:");
                 dateString = Console.ReadLine();
             }
-            while (!DateTime.TryParseExact(dateString, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.AssumeLocal, out date) || date < new DateTime(1950, 1, 1) || date > DateTime.Now);
+            while (!DateTime.TryParseExact(dateString, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.AssumeLocal, out date));
 
             do
             {
                 Console.Write("Height:");
             }
-            while (!short.TryParse(Console.ReadLine(), out height) || height < 0 || height > 250);
+            while (!short.TryParse(Console.ReadLine(), out height));
 
             do
             {
                 Console.Write("Salary:");
             }
-            while (!decimal.TryParse(Console.ReadLine(), out salary) || salary < 0);
+            while (!decimal.TryParse(Console.ReadLine(), out salary));
 
-            do
-            {
-                Console.Write("Type:");
-                typeString = Console.ReadLine();
-                type = typeString[0];
-            }
-            while (!char.IsLetter(type));
+            Console.Write("Type:");
+            typeString = Console.ReadLine();
+            type = typeString[0];
+
+            return new FileCabinetRecord { FirstName = firstName, LastName = lastName, DateOfBirth = date, Height = height, Salary = salary, Type = type };
         }
 
         private static void List(string parameters)
@@ -187,21 +185,20 @@ namespace FileCabinetApp
 
         private static void Edit(string parameters)
         {
-            string firstName, lastName;
-            DateTime date;
-            short height;
-            decimal salary;
-            char type;
             int id;
 
-            while (!int.TryParse(parameters, out id))
+            if (!int.TryParse(parameters, out id))
             {
+                Console.WriteLine("Incorrect id parameter");
+                return;
             }
 
-            Program.Input(out firstName, out lastName, out date, out height, out salary, out type);
             try
             {
-                Program.fileCabinetService.EditRecord(id, firstName, lastName, date, height, salary, type);
+                var fileCabinetRecord = Program.Input();
+                fileCabinetRecord.Id = id;
+
+                Program.fileCabinetService.EditRecord(fileCabinetRecord);
                 Console.WriteLine($"Record #{id} is updated.");
             }
             catch (ArgumentException)
@@ -238,23 +235,37 @@ namespace FileCabinetApp
 
             if (command == "lastname")
             {
-                string lastname = parametersArray[1];
-                lastname = lastname.Substring(1, lastname.Length - 2);
-                records = Program.fileCabinetService.FindByLastName(lastname);
+                try
+                {
+                    string lastname = parametersArray[1];
+                    lastname = lastname.Substring(1, lastname.Length - 2);
+                    records = Program.fileCabinetService.FindByLastName(lastname);
+                }
+                catch (ArgumentException)
+                {
+                    Console.WriteLine("Record with that lasrname not found");
+                }
             }
 
             if (command == "dateofbirth")
             {
-                string dateofbirth = parametersArray[1];
-                dateofbirth = dateofbirth.Substring(1, dateofbirth.Length - 2);
-                DateTime date;
-                if (!DateTime.TryParseExact(dateofbirth, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.AssumeLocal, out date))
+                try
                 {
-                    Console.WriteLine("Incorrect date");
-                    return;
-                }
+                    string dateofbirth = parametersArray[1];
+                    dateofbirth = dateofbirth[1..^2];
+                    DateTime date;
+                    if (!DateTime.TryParseExact(dateofbirth, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.AssumeLocal, out date))
+                    {
+                        Console.WriteLine("Incorrect date");
+                        return;
+                    }
 
-                records = Program.fileCabinetService.FindDateOfBirth(date);
+                    records = Program.fileCabinetService.FindDateOfBirth(date);
+                }
+                catch (ArgumentException)
+                {
+                    Console.WriteLine("Record with that firstname not found");
+                }
             }
 
             foreach (var record in records)
