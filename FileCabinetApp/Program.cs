@@ -14,7 +14,7 @@ namespace FileCabinetApp
 
         private static bool isRunning = true;
 
-        private static FileCabinetService fileCabinetService = new FileCabinetService();
+        private static FileCabinetService fileCabinetService = new ();
 
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
         {
@@ -38,7 +38,7 @@ namespace FileCabinetApp
             new string[] { "find", "allows to find record ", "The 'find' command allows to find record. " },
         };
 
-        public static void Main(string[] args)
+        public static void Main()
         {
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
             Console.WriteLine(Program.HintMessage);
@@ -127,10 +127,10 @@ namespace FileCabinetApp
             }
             catch (ArgumentException)
             {
-                Console.WriteLine("Plase, input data again!");
+                Console.WriteLine("Incorrect data! Please, input data again!");
                 Program.Create(parameters);
             }
-            
+            Console.WriteLine();
         }
 
         private static FileCabinetRecord Input()
@@ -224,7 +224,7 @@ namespace FileCabinetApp
                 try
                 {
                     string firstName = parametersArray[1];
-                    firstName = firstName.Substring(1, firstName.Length - 2);
+                    firstName = firstName[1..^2];
                     records = Program.fileCabinetService.FindByFirstName(firstName);
                 }
                 catch (ArgumentException)
@@ -238,7 +238,7 @@ namespace FileCabinetApp
                 try
                 {
                     string lastname = parametersArray[1];
-                    lastname = lastname.Substring(1, lastname.Length - 2);
+                    lastname = lastname[1..^2];
                     records = Program.fileCabinetService.FindByLastName(lastname);
                 }
                 catch (ArgumentException)
