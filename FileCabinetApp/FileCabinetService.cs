@@ -96,5 +96,16 @@ namespace FileCabinetApp
             firstName = firstName.ToLower(CultureInfo.CurrentCulture);
             return this.list.Where(i => i.FirstName.ToLower(CultureInfo.CurrentCulture) == firstName).ToArray();
         }
+
+        public FileCabinetRecord[] FindByLastName(string lastName)
+        {
+            if (string.IsNullOrEmpty(lastName))
+            {
+                throw new ArgumentException("incorrect lastName", nameof(lastName));
+            }
+
+            lastName = lastName.ToLower(CultureInfo.CurrentCulture);
+            return this.list.Where(i => i.LastName.ToLower(CultureInfo.CurrentCulture) == lastName).ToArray();
+        }
     }
 }

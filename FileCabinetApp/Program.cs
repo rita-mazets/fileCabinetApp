@@ -212,7 +212,8 @@ namespace FileCabinetApp
 
         private static void Find(string parameters)
         {
-            var parametersArray = parameters.Split(' ');
+            FileCabinetRecord[] records = Array.Empty<FileCabinetRecord>();
+            var parametersArray = parameters.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
             if (parametersArray.Length < 2)
             {
@@ -220,12 +221,26 @@ namespace FileCabinetApp
             }
 
             string command = parametersArray[0].ToLower(CultureInfo.CurrentCulture);
-            string firstName = parametersArray[1];
-            FileCabinetRecord[] records = Array.Empty<FileCabinetRecord>();
 
             if (command == "firstname")
             {
+                string firstName = parametersArray[1];
+                firstName = firstName.Substring(1, firstName.Length - 2);
                 records = Program.fileCabinetService.FindByFirstName(firstName);
+            }
+
+            if (command == "lastname")
+            {
+                string lastname = parametersArray[1];
+                lastname = lastname.Substring(1, lastname.Length - 2);
+                records = Program.fileCabinetService.FindByLastName(lastname);
+            }
+
+            if (command == "dateofbirth")
+            {
+                string dateofbirth = parametersArray[1];
+                dateofbirth = dateofbirth.Substring(1, dateofbirth.Length - 1);
+                records = Program.fileCabinetService.FindByFirstName(dateofbirth);
             }
 
             foreach (var record in records)
