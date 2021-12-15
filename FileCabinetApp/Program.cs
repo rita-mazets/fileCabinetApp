@@ -224,9 +224,16 @@ namespace FileCabinetApp
 
             if (command == "firstname")
             {
-                string firstName = parametersArray[1];
-                firstName = firstName.Substring(1, firstName.Length - 2);
-                records = Program.fileCabinetService.FindByFirstName(firstName);
+                try
+                {
+                    string firstName = parametersArray[1];
+                    firstName = firstName.Substring(1, firstName.Length - 2);
+                    records = Program.fileCabinetService.FindByFirstName(firstName);
+                }
+                catch (ArgumentException)
+                {
+                    Console.WriteLine("Record with that firstname not found");
+                }
             }
 
             if (command == "lastname")
@@ -239,14 +246,23 @@ namespace FileCabinetApp
             if (command == "dateofbirth")
             {
                 string dateofbirth = parametersArray[1];
-                dateofbirth = dateofbirth.Substring(1, dateofbirth.Length - 1);
-                records = Program.fileCabinetService.FindByFirstName(dateofbirth);
+                dateofbirth = dateofbirth.Substring(1, dateofbirth.Length - 2);
+                DateTime date;
+                if (!DateTime.TryParseExact(dateofbirth, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.AssumeLocal, out date))
+                {
+                    Console.WriteLine("Incorrect date");
+                    return;
+                }
+
+                records = Program.fileCabinetService.FindDateOfBirth(date);
             }
 
             foreach (var record in records)
             {
                 Console.WriteLine($"#{record.Id}, {record.FirstName}, {record.LastName}, {record.DateOfBirth:yyyy-MMM-dd}, {record.Height}, {record.Salary}, {record.Type}");
             }
+
+            Console.WriteLine();
         }
     }
 }
