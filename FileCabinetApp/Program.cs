@@ -24,6 +24,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("create", Create),
             new Tuple<string, Action<string>>("list", List),
             new Tuple<string, Action<string>>("edit", Edit),
+            new Tuple<string, Action<string>>("find", Find),
         };
 
         private static string[][] helpMessages = new string[][]
@@ -33,7 +34,8 @@ namespace FileCabinetApp
             new string[] { "stat", "prints the amount of data in the service", "The 'stat' command print the amount of data in the service. " },
             new string[] { "create", "creates new record", "The 'create' command creates new record. " },
             new string[] { "list", "prints all records", "The 'list' command prints all records. " },
-            new string[] { "edit", "allows to edit record ", "The 'list' command allows to edit record. " },
+            new string[] { "edit", "allows to edit record ", "The 'edit' command allows to edit record. " },
+            new string[] { "find", "allows to find record ", "The 'find' command allows to find record. " },
         };
 
         public static void Main(string[] args)
@@ -192,11 +194,9 @@ namespace FileCabinetApp
             char type;
             int id;
 
-            do
+            while (!int.TryParse(parameters, out id))
             {
-                Console.Write("Id:");
             }
-            while (!int.TryParse(Console.ReadLine(), out id));
 
             Program.Input(out firstName, out lastName, out date, out height, out salary, out type);
             try
@@ -208,6 +208,61 @@ namespace FileCabinetApp
             {
                 Console.WriteLine($"#{id} record is not found.");
             }
+        }
+
+        private static void Find(string parameters)
+        {
+            FileCabinetRecord[] records = Array.Empty<FileCabinetRecord>();
+            var parametersArray = parameters.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            if (parametersArray.Length < 2)
+            {
+                throw new ArgumentException("'find' must have more than 2 parameters", nameof(parameters));
+            }
+
+            string command = parametersArray[0].ToLower(CultureInfo.CurrentCulture);
+
+            if (command == "firstname")
+            {
+                try
+                {
+                    string firstName = parametersArray[1];
+                    firstName = firstName.Substring(1, firstName.Length - 2);
+                    records = Program.fileCabinetService.FindByFirstName(firstName);
+                }
+                catch (ArgumentException)
+                {
+                    Console.WriteLine("Record with that firstname not found");
+                }
+            }
+
+            if (command == "lastname")
+            {
+                string lastname = parametersArray[1];
+                lastname = lastname.Substring(1, lastname.Length - 2);
+                records = Program.fileCabinetService.FindByLastName(lastname);
+            }
+
+            if (command == "dateofbirth")
+            {
+                string dateofbirth = parametersArray[1];
+                dateofbirth = dateofbirth.Substring(1, dateofbirth.Length - 2);
+                DateTime date;
+                if (!DateTime.TryParseExact(dateofbirth, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.AssumeLocal, out date))
+                {
+                    Console.WriteLine("Incorrect date");
+                    return;
+                }
+
+                records = Program.fileCabinetService.FindDateOfBirth(date);
+            }
+
+            foreach (var record in records)
+            {
+                Console.WriteLine($"#{record.Id}, {record.FirstName}, {record.LastName}, {record.DateOfBirth:yyyy-MMM-dd}, {record.Height}, {record.Salary}, {record.Type}");
+            }
+
+            Console.WriteLine();
         }
     }
 }
