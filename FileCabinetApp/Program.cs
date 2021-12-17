@@ -4,6 +4,9 @@ using FileCabinetApp;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Starting class.
+    /// </summary>
     public static class Program
     {
         private const string DeveloperName = "Margarita Mazets";
@@ -38,6 +41,9 @@ namespace FileCabinetApp
             new string[] { "find", "allows to find record ", "The 'find' command allows to find record. " },
         };
 
+        /// <summary>
+        /// The main program method.
+        /// </summary>
         public static void Main()
         {
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
@@ -130,6 +136,7 @@ namespace FileCabinetApp
                 Console.WriteLine("Incorrect data! Please, input data again!");
                 Program.Create(parameters);
             }
+
             Console.WriteLine();
         }
 

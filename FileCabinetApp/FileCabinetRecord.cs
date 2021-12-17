@@ -6,8 +6,17 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Describes the records.
+    /// </summary>
     public class FileCabinetRecord
     {
+        /// <summary>
+        /// Describes the records.
+        /// </summary>
+        /// <value>
+        /// Idemtity number.
+        /// </value>
         public int Id { get; set; }
 
         public string FirstName { get; set; }

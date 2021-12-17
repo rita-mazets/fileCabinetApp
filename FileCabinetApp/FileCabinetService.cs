@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Is created to work with records.
+    /// </summary>
     public class FileCabinetService
     {
         private readonly List<FileCabinetRecord> list = new ();
@@ -15,6 +18,11 @@ namespace FileCabinetApp
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new ();
         private readonly Dictionary<DateTime, List<FileCabinetRecord>> dateOfBirthDictionary = new ();
 
+        /// <summary>
+        /// Creates new record and return id.
+        /// </summary>
+        /// <param name="fileCabinetRecord">Parameter to insert data.</param>
+        /// <returns>Record id.</returns>
         public int CreateRecord(FileCabinetRecord fileCabinetRecord)
         {
             if (fileCabinetRecord is null)
@@ -38,32 +46,32 @@ namespace FileCabinetApp
         {
             if (string.IsNullOrWhiteSpace(fileCabinetRecord.FirstName) || fileCabinetRecord.FirstName.Length < 2 || fileCabinetRecord.FirstName.Length > 60)
             {
-                throw new ArgumentException("incorrect firstName", nameof(fileCabinetRecord.FirstName));
+                throw new ArgumentException("incorrect firstName", nameof(fileCabinetRecord));
             }
 
             if (string.IsNullOrWhiteSpace(fileCabinetRecord.LastName) || fileCabinetRecord.LastName.Length < 2 || fileCabinetRecord.LastName.Length > 60)
             {
-                throw new ArgumentException("incorrect lastName", nameof(fileCabinetRecord.LastName));
+                throw new ArgumentException("incorrect lastName", nameof(fileCabinetRecord));
             }
 
             if (fileCabinetRecord.Height < 0 || fileCabinetRecord.Height > 250)
             {
-                throw new ArgumentException("incorrect height", nameof(fileCabinetRecord.Height));
+                throw new ArgumentException("incorrect height", nameof(fileCabinetRecord));
             }
 
             if (fileCabinetRecord.DateOfBirth < new DateTime(1950, 1, 1) || fileCabinetRecord.DateOfBirth > DateTime.Now)
             {
-                throw new ArgumentException("incorrect dateOfBirth", nameof(fileCabinetRecord.DateOfBirth));
+                throw new ArgumentException("incorrect dateOfBirth", nameof(fileCabinetRecord));
             }
 
             if (fileCabinetRecord.Salary < 0)
             {
-                throw new ArgumentException("incorrect salary", nameof(fileCabinetRecord.Salary));
+                throw new ArgumentException("incorrect salary", nameof(fileCabinetRecord));
             }
 
             if (!char.IsLetter(fileCabinetRecord.Type))
             {
-                throw new ArgumentException("incorrect type", nameof(fileCabinetRecord.Type));
+                throw new ArgumentException("incorrect type", nameof(fileCabinetRecord));
             }
         }
 
@@ -85,16 +93,28 @@ namespace FileCabinetApp
             this.list.Add(item);
         }
 
+        /// <summary>
+        /// Gets all records.
+        /// </summary>
+        /// <returns>All records.</returns>
         public FileCabinetRecord[] GetRecords()
         {
             return this.list.ToArray();
         }
 
+        /// <summary>
+        /// Gets the number of records.
+        /// </summary>
+        /// <returns>Record count.</returns>
         public int GetStat()
         {
             return this.list.Count;
         }
 
+        /// <summary>
+        /// Edits an existing record.
+        /// </summary>
+        /// <param name="fileCabinetRecord">Parameter to edit data.</param>
         public void EditRecord(FileCabinetRecord fileCabinetRecord)
         {
             if (fileCabinetRecord is null)
@@ -110,7 +130,7 @@ namespace FileCabinetApp
 
             if (!isExist)
             {
-                throw new ArgumentException("id record is not found", nameof(fileCabinetRecord.Id));
+                throw new ArgumentException("id record is not found", nameof(fileCabinetRecord));
             }
         }
 
@@ -175,6 +195,11 @@ namespace FileCabinetApp
             return isExist;
         }
 
+        /// <summary>
+        /// Searches in the dictionary for data by firstName and return array where FirstName is equal firstName .
+        /// </summary>
+        /// <param name="firstName">Param to search.</param>
+        /// <returns>Array where FirstName is equal firstName.</returns>
         public FileCabinetRecord[] FindByFirstName(string firstName)
         {
             if (string.IsNullOrEmpty(firstName))
@@ -192,6 +217,11 @@ namespace FileCabinetApp
             return this.firstNameDictionary[firstName].ToArray();
         }
 
+        /// <summary>
+        /// Searches in the dictionary for data by lastName and return array where LastName is equal lastName .
+        /// </summary>
+        /// <param name="lastName">Param to search.</param>
+        /// <returns>Array where LastName is equal lastName.</returns>
         public FileCabinetRecord[] FindByLastName(string lastName)
         {
             if (string.IsNullOrEmpty(lastName))
@@ -208,6 +238,11 @@ namespace FileCabinetApp
             return this.lastNameDictionary[lastName].ToArray();
         }
 
+        /// <summary>
+        /// Searches in the dictionary for data by dateOfBirth and return array where DateOfBirth is equal dateOfBirth .
+        /// </summary>
+        /// <param name="dateOfBirth">Param to search.</param>
+        /// <returns>Array where DateOfBirth is equal dateOfBirth.</returns>
         public FileCabinetRecord[] FindDateOfBirth(DateTime dateOfBirth)
         {
             if (!this.dateOfBirthDictionary.ContainsKey(dateOfBirth))
