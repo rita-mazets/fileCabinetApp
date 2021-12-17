@@ -10,13 +10,24 @@ namespace FileCabinetApp
     /// <summary>
     /// Works with records.
     /// </summary>
-    public abstract class FileCabinetService
+    public class FileCabinetService
     {
         private readonly List<FileCabinetRecord> list = new ();
 
         private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new ();
         private readonly Dictionary<DateTime, List<FileCabinetRecord>> dateOfBirthDictionary = new ();
+
+        private IRecordValidator recordValidator;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileCabinetService"/> class.
+        /// </summary>
+        /// <param name="recordValidator">Parameter to choose validator.</param>
+        public FileCabinetService(IRecordValidator recordValidator)
+        {
+            this.recordValidator = recordValidator;
+        }
 
         /// <summary>
         /// Creates new record and return id.
@@ -30,7 +41,7 @@ namespace FileCabinetApp
                 throw new ArgumentNullException(nameof(fileCabinetRecord));
             }
 
-            this.CreateValidator().ValidateParameters(fileCabinetRecord);
+            this.recordValidator.ValidateParameters(fileCabinetRecord);
 
             var listItem = new FileCabinetRecord
             {
@@ -40,11 +51,6 @@ namespace FileCabinetApp
 
             this.InsertIntoCollection(listItem, fileCabinetRecord.FirstName, fileCabinetRecord.LastName, fileCabinetRecord.DateOfBirth);
             return listItem.Id;
-        }
-
-        public virtual IRecordValidator CreateValidator()
-        {
-            return this.CreateValidator();
         }
 
         private static void InsertIntoDictionary<T>(Dictionary<T, List<FileCabinetRecord>> dict, T key, FileCabinetRecord item)
@@ -94,7 +100,7 @@ namespace FileCabinetApp
                 throw new ArgumentNullException(nameof(fileCabinetRecord));
             }
 
-            this.CreateValidator().ValidateParameters(fileCabinetRecord);
+            this.recordValidator.ValidateParameters(fileCabinetRecord);
 
             bool isExist = false;
             isExist = this.EditListItem(fileCabinetRecord, isExist);
