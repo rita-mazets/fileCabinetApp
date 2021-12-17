@@ -95,7 +95,7 @@ namespace FileCabinetApp
                     {
                         if (item.ToLower(CultureInfo.CurrentCulture).Contains("default"))
                         {
-                            fileCabinetService = new FileCabinetDefaultService();
+                            fileCabinetService = new FileCabinetService(new DefaultValidator());
                             isValidationRules = true;
                             nameValidationParam = "default";
                         }
@@ -103,7 +103,7 @@ namespace FileCabinetApp
                         if (item.ToLower(CultureInfo.CurrentCulture).Contains("custom"))
                         {
                             isValidationRules = true;
-                            fileCabinetService = new FileCabinetCustomService();
+                            fileCabinetService = new FileCabinetService(new CustomValidator());
                             nameValidationParam = "custom";
                         }
                     }
@@ -117,7 +117,7 @@ namespace FileCabinetApp
                     {
                         if (item.ToLower(CultureInfo.CurrentCulture).Equals("default"))
                         {
-                            fileCabinetService = new FileCabinetDefaultService();
+                            fileCabinetService = new FileCabinetService(new DefaultValidator());
                             isValidationRules = true;
                             nameValidationParam = "default";
                             isV = false;
@@ -126,7 +126,7 @@ namespace FileCabinetApp
                         if (item.ToLower(CultureInfo.CurrentCulture).Contains("custom"))
                         {
                             isValidationRules = true;
-                            fileCabinetService = new FileCabinetCustomService();
+                            fileCabinetService = new FileCabinetService(new CustomValidator());
                             nameValidationParam = "custom";
                             isV = false;
                         }
@@ -136,7 +136,7 @@ namespace FileCabinetApp
 
             if (!isValidationRules)
             {
-                fileCabinetService = new FileCabinetDefaultService();
+                fileCabinetService = new FileCabinetService(new DefaultValidator());
                 nameValidationParam = "default";
             }
 
