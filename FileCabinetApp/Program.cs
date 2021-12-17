@@ -17,7 +17,7 @@ namespace FileCabinetApp
 
         private static bool isRunning = true;
 
-        private static FileCabinetService fileCabinetService = new ();
+        private static FileCabinetService fileCabinetService;
 
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
         {
@@ -44,9 +44,13 @@ namespace FileCabinetApp
         /// <summary>
         /// The main program method.
         /// </summary>
-        public static void Main()
+        /// <param name="args">Sets command line parameters.</param>
+        public static void Main(string[] args)
         {
+            string nameValidationParam = ParseArgs(args);
+
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
+            Console.WriteLine($"Using {nameValidationParam} validation rules.");
             Console.WriteLine(Program.HintMessage);
             Console.WriteLine();
 
@@ -76,6 +80,67 @@ namespace FileCabinetApp
                 }
             }
             while (isRunning);
+        }
+
+        private static string ParseArgs(string[] argc)
+        {
+            bool isValidationRules = false;
+            bool isV = false;
+            string nameValidationParam = "default";
+            if (argc is not null)
+            {
+                foreach (var item in argc)
+                {
+                    if (item.ToLower(CultureInfo.CurrentCulture).Contains("--validation-rules="))
+                    {
+                        if (item.ToLower(CultureInfo.CurrentCulture).Contains("default"))
+                        {
+                            fileCabinetService = new FileCabinetDefaultService();
+                            isValidationRules = true;
+                            nameValidationParam = "default";
+                        }
+
+                        if (item.ToLower(CultureInfo.CurrentCulture).Contains("custom"))
+                        {
+                            isValidationRules = true;
+                            fileCabinetService = new FileCabinetCustomService();
+                            nameValidationParam = "custom";
+                        }
+                    }
+
+                    if (item.ToLower(CultureInfo.CurrentCulture).Equals("-v"))
+                    {
+                        isV = true;
+                    }
+
+                    if (isV)
+                    {
+                        if (item.ToLower(CultureInfo.CurrentCulture).Equals("default"))
+                        {
+                            fileCabinetService = new FileCabinetDefaultService();
+                            isValidationRules = true;
+                            nameValidationParam = "default";
+                            isV = false;
+                        }
+
+                        if (item.ToLower(CultureInfo.CurrentCulture).Contains("custom"))
+                        {
+                            isValidationRules = true;
+                            fileCabinetService = new FileCabinetCustomService();
+                            nameValidationParam = "custom";
+                            isV = false;
+                        }
+                    }
+                }
+            }
+
+            if (!isValidationRules)
+            {
+                fileCabinetService = new FileCabinetDefaultService();
+                nameValidationParam = "default";
+            }
+
+            return nameValidationParam;
         }
 
         private static void PrintMissedCommandInfo(string command)

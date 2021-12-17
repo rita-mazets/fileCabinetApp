@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 namespace FileCabinetApp
 {
     /// <summary>
-    /// Is created to work with records.
+    /// Works with records.
     /// </summary>
-    public class FileCabinetService
+    public abstract class FileCabinetService
     {
         private readonly List<FileCabinetRecord> list = new ();
 
@@ -30,7 +30,7 @@ namespace FileCabinetApp
                 throw new ArgumentNullException(nameof(fileCabinetRecord));
             }
 
-            Validation(fileCabinetRecord);
+            this.CreateValidator().ValidateParameters(fileCabinetRecord);
 
             var listItem = new FileCabinetRecord
             {
@@ -42,37 +42,9 @@ namespace FileCabinetApp
             return listItem.Id;
         }
 
-        private static void Validation(FileCabinetRecord fileCabinetRecord)
+        public virtual IRecordValidator CreateValidator()
         {
-            if (string.IsNullOrWhiteSpace(fileCabinetRecord.FirstName) || fileCabinetRecord.FirstName.Length < 2 || fileCabinetRecord.FirstName.Length > 60)
-            {
-                throw new ArgumentException("incorrect firstName", nameof(fileCabinetRecord));
-            }
-
-            if (string.IsNullOrWhiteSpace(fileCabinetRecord.LastName) || fileCabinetRecord.LastName.Length < 2 || fileCabinetRecord.LastName.Length > 60)
-            {
-                throw new ArgumentException("incorrect lastName", nameof(fileCabinetRecord));
-            }
-
-            if (fileCabinetRecord.Height < 0 || fileCabinetRecord.Height > 250)
-            {
-                throw new ArgumentException("incorrect height", nameof(fileCabinetRecord));
-            }
-
-            if (fileCabinetRecord.DateOfBirth < new DateTime(1950, 1, 1) || fileCabinetRecord.DateOfBirth > DateTime.Now)
-            {
-                throw new ArgumentException("incorrect dateOfBirth", nameof(fileCabinetRecord));
-            }
-
-            if (fileCabinetRecord.Salary < 0)
-            {
-                throw new ArgumentException("incorrect salary", nameof(fileCabinetRecord));
-            }
-
-            if (!char.IsLetter(fileCabinetRecord.Type))
-            {
-                throw new ArgumentException("incorrect type", nameof(fileCabinetRecord));
-            }
+            return this.CreateValidator();
         }
 
         private static void InsertIntoDictionary<T>(Dictionary<T, List<FileCabinetRecord>> dict, T key, FileCabinetRecord item)
@@ -122,7 +94,7 @@ namespace FileCabinetApp
                 throw new ArgumentNullException(nameof(fileCabinetRecord));
             }
 
-            Validation(fileCabinetRecord);
+            this.CreateValidator().ValidateParameters(fileCabinetRecord);
 
             bool isExist = false;
             isExist = this.EditListItem(fileCabinetRecord, isExist);
