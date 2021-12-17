@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using FileCabinetApp;
 
@@ -281,7 +283,7 @@ namespace FileCabinetApp
 
         private static void Find(string parameters)
         {
-            FileCabinetRecord[] records = Array.Empty<FileCabinetRecord>();
+            IEnumerable<FileCabinetRecord> records = Array.Empty<FileCabinetRecord>();
             var parametersArray = parameters.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
             if (parametersArray.Length < 2)
@@ -296,7 +298,7 @@ namespace FileCabinetApp
                 try
                 {
                     string firstName = parametersArray[1];
-                    firstName = firstName[1..^2];
+                    firstName = firstName[1..^1];
                     records = Program.fileCabinetService.FindByFirstName(firstName);
                 }
                 catch (ArgumentException)

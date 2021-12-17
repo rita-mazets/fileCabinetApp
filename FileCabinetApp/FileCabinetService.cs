@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -75,9 +76,9 @@ namespace FileCabinetApp
         /// Gets all records.
         /// </summary>
         /// <returns>All records.</returns>
-        public FileCabinetRecord[] GetRecords()
+        public ReadOnlyCollection<FileCabinetRecord> GetRecords()
         {
-            return this.list.ToArray();
+            return new ReadOnlyCollection<FileCabinetRecord>(this.list);
         }
 
         /// <summary>
@@ -178,7 +179,7 @@ namespace FileCabinetApp
         /// </summary>
         /// <param name="firstName">Param to search.</param>
         /// <returns>Array where FirstName is equal firstName.</returns>
-        public FileCabinetRecord[] FindByFirstName(string firstName)
+        public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
         {
             if (string.IsNullOrEmpty(firstName))
             {
@@ -192,7 +193,7 @@ namespace FileCabinetApp
                 throw new ArgumentException("firstName don't consist in dictionary", nameof(firstName));
             }
 
-            return this.firstNameDictionary[firstName].ToArray();
+            return new ReadOnlyCollection<FileCabinetRecord>(this.firstNameDictionary[firstName]);
         }
 
         /// <summary>
@@ -200,7 +201,7 @@ namespace FileCabinetApp
         /// </summary>
         /// <param name="lastName">Param to search.</param>
         /// <returns>Array where LastName is equal lastName.</returns>
-        public FileCabinetRecord[] FindByLastName(string lastName)
+        public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName)
         {
             if (string.IsNullOrEmpty(lastName))
             {
@@ -213,7 +214,7 @@ namespace FileCabinetApp
             }
 
             lastName = lastName.ToLower(CultureInfo.CurrentCulture);
-            return this.lastNameDictionary[lastName].ToArray();
+            return new ReadOnlyCollection<FileCabinetRecord>(this.lastNameDictionary[lastName]);
         }
 
         /// <summary>
@@ -221,14 +222,14 @@ namespace FileCabinetApp
         /// </summary>
         /// <param name="dateOfBirth">Param to search.</param>
         /// <returns>Array where DateOfBirth is equal dateOfBirth.</returns>
-        public FileCabinetRecord[] FindDateOfBirth(DateTime dateOfBirth)
+        public ReadOnlyCollection<FileCabinetRecord> FindDateOfBirth(DateTime dateOfBirth)
         {
             if (!this.dateOfBirthDictionary.ContainsKey(dateOfBirth))
             {
                 throw new ArgumentException("dateOfBirth don't consist in dictionary", nameof(dateOfBirth));
             }
 
-            return this.dateOfBirthDictionary[dateOfBirth].ToArray();
+            return new ReadOnlyCollection<FileCabinetRecord>(this.dateOfBirthDictionary[dateOfBirth]);
         }
     }
 }
