@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using FileCabinetApp;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Starting class.
+    /// </summary>
     public static class Program
     {
         private const string DeveloperName = "Margarita Mazets";
@@ -14,7 +19,7 @@ namespace FileCabinetApp
 
         private static bool isRunning = true;
 
-        private static FileCabinetService fileCabinetService = new FileCabinetService();
+        private static FileCabinetService fileCabinetService;
 
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
         {
@@ -38,9 +43,16 @@ namespace FileCabinetApp
             new string[] { "find", "allows to find record ", "The 'find' command allows to find record. " },
         };
 
+        /// <summary>
+        /// The main program method.
+        /// </summary>
+        /// <param name="args">Sets command line parameters.</param>
         public static void Main(string[] args)
         {
+            string nameValidationParam = ParseArgs(args);
+
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
+            Console.WriteLine($"Using {nameValidationParam} validation rules.");
             Console.WriteLine(Program.HintMessage);
             Console.WriteLine();
 
@@ -70,6 +82,67 @@ namespace FileCabinetApp
                 }
             }
             while (isRunning);
+        }
+
+        private static string ParseArgs(string[] argc)
+        {
+            bool isValidationRules = false;
+            bool isV = false;
+            string nameValidationParam = "default";
+            if (argc is not null)
+            {
+                foreach (var item in argc)
+                {
+                    if (item.ToLower(CultureInfo.CurrentCulture).Contains("--validation-rules="))
+                    {
+                        if (item.ToLower(CultureInfo.CurrentCulture).Contains("default"))
+                        {
+                            fileCabinetService = new FileCabinetService(new DefaultValidator());
+                            isValidationRules = true;
+                            nameValidationParam = "default";
+                        }
+
+                        if (item.ToLower(CultureInfo.CurrentCulture).Contains("custom"))
+                        {
+                            isValidationRules = true;
+                            fileCabinetService = new FileCabinetService(new CustomValidator());
+                            nameValidationParam = "custom";
+                        }
+                    }
+
+                    if (item.ToLower(CultureInfo.CurrentCulture).Equals("-v"))
+                    {
+                        isV = true;
+                    }
+
+                    if (isV)
+                    {
+                        if (item.ToLower(CultureInfo.CurrentCulture).Equals("default"))
+                        {
+                            fileCabinetService = new FileCabinetService(new DefaultValidator());
+                            isValidationRules = true;
+                            nameValidationParam = "default";
+                            isV = false;
+                        }
+
+                        if (item.ToLower(CultureInfo.CurrentCulture).Contains("custom"))
+                        {
+                            isValidationRules = true;
+                            fileCabinetService = new FileCabinetService(new CustomValidator());
+                            nameValidationParam = "custom";
+                            isV = false;
+                        }
+                    }
+                }
+            }
+
+            if (!isValidationRules)
+            {
+                fileCabinetService = new FileCabinetService(new DefaultValidator());
+                nameValidationParam = "default";
+            }
+
+            return nameValidationParam;
         }
 
         private static void PrintMissedCommandInfo(string command)
@@ -119,61 +192,48 @@ namespace FileCabinetApp
 
         private static void Create(string parameters)
         {
+            try
+            {
+                var fileCabinetRecord = Program.Input();
+                var result = Program.fileCabinetService.CreateRecord(fileCabinetRecord);
+                Console.WriteLine($"Record #{result} is created.\n");
+            }
+            catch (ArgumentException)
+            {
+                Console.WriteLine("Incorrect data! Please, input data again!");
+                Program.Create(parameters);
+            }
+
+            Console.WriteLine();
+        }
+
+        private static FileCabinetRecord Input()
+        {
             string firstName, lastName;
             DateTime date;
             short height;
             decimal salary;
             char type;
 
-            Program.Input(out firstName, out lastName, out date, out height, out salary, out type);
+            Console.Write("First name:");
+            firstName = ReadInput<string>(DataConverter.StringConverter, DataValidator.NameValidator);
 
-            var result = Program.fileCabinetService.CreateRecord(firstName, lastName, date, height, salary, type);
-            Console.WriteLine($"Record #{result} is created.\n");
-        }
+            Console.Write("Last name:");
+            lastName = ReadInput<string>(DataConverter.StringConverter, DataValidator.NameValidator);
 
-        private static void Input(out string firstName, out string lastName, out DateTime date, out short height, out decimal salary, out char type)
-        {
-            string dateString, typeString;
-            do
-            {
-                Console.Write("First name:");
-                firstName = Console.ReadLine();
-            }
-            while (string.IsNullOrWhiteSpace(firstName) || firstName.Length < 2 || firstName.Length > 60);
+            Console.Write("Date of birth:");
+            date = ReadInput<DateTime>(DataConverter.DateConverter, DataValidator.DateValidator);
 
-            do
-            {
-                Console.Write("Last name:");
-                lastName = Console.ReadLine();
-            }
-            while (string.IsNullOrWhiteSpace(lastName) || lastName.Length < 2 || lastName.Length > 60);
+            Console.Write("Height:");
+            height = ReadInput<short>(DataConverter.ShortConverter, DataValidator.HeightValidator);
 
-            do
-            {
-                Console.Write("Date of birth:");
-                dateString = Console.ReadLine();
-            }
-            while (!DateTime.TryParseExact(dateString, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.AssumeLocal, out date) || date < new DateTime(1950, 1, 1) || date > DateTime.Now);
+            Console.Write("Salary:");
+            salary = ReadInput<decimal>(DataConverter.DecimalConverter, DataValidator.SalaryValidator);
 
-            do
-            {
-                Console.Write("Height:");
-            }
-            while (!short.TryParse(Console.ReadLine(), out height) || height < 0 || height > 250);
+            Console.Write("Type:");
+            type = ReadInput<char>(DataConverter.CharConverter, DataValidator.TypeValidator);
 
-            do
-            {
-                Console.Write("Salary:");
-            }
-            while (!decimal.TryParse(Console.ReadLine(), out salary) || salary < 0);
-
-            do
-            {
-                Console.Write("Type:");
-                typeString = Console.ReadLine();
-                type = typeString[0];
-            }
-            while (!char.IsLetter(type));
+            return new FileCabinetRecord { FirstName = firstName, LastName = lastName, DateOfBirth = date, Height = height, Salary = salary, Type = type };
         }
 
         private static void List(string parameters)
@@ -187,21 +247,20 @@ namespace FileCabinetApp
 
         private static void Edit(string parameters)
         {
-            string firstName, lastName;
-            DateTime date;
-            short height;
-            decimal salary;
-            char type;
             int id;
 
-            while (!int.TryParse(parameters, out id))
+            if (!int.TryParse(parameters, out id))
             {
+                Console.WriteLine("Incorrect id parameter");
+                return;
             }
 
-            Program.Input(out firstName, out lastName, out date, out height, out salary, out type);
             try
             {
-                Program.fileCabinetService.EditRecord(id, firstName, lastName, date, height, salary, type);
+                var fileCabinetRecord = Program.Input();
+                fileCabinetRecord.Id = id;
+
+                Program.fileCabinetService.EditRecord(fileCabinetRecord);
                 Console.WriteLine($"Record #{id} is updated.");
             }
             catch (ArgumentException)
@@ -212,7 +271,7 @@ namespace FileCabinetApp
 
         private static void Find(string parameters)
         {
-            FileCabinetRecord[] records = Array.Empty<FileCabinetRecord>();
+            IEnumerable<FileCabinetRecord> records = Array.Empty<FileCabinetRecord>();
             var parametersArray = parameters.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
             if (parametersArray.Length < 2)
@@ -227,7 +286,7 @@ namespace FileCabinetApp
                 try
                 {
                     string firstName = parametersArray[1];
-                    firstName = firstName.Substring(1, firstName.Length - 2);
+                    firstName = firstName[1..^1];
                     records = Program.fileCabinetService.FindByFirstName(firstName);
                 }
                 catch (ArgumentException)
@@ -238,23 +297,37 @@ namespace FileCabinetApp
 
             if (command == "lastname")
             {
-                string lastname = parametersArray[1];
-                lastname = lastname.Substring(1, lastname.Length - 2);
-                records = Program.fileCabinetService.FindByLastName(lastname);
+                try
+                {
+                    string lastname = parametersArray[1];
+                    lastname = lastname[1..^1];
+                    records = Program.fileCabinetService.FindByLastName(lastname);
+                }
+                catch (ArgumentException)
+                {
+                    Console.WriteLine("Record with that lasrname not found");
+                }
             }
 
             if (command == "dateofbirth")
             {
-                string dateofbirth = parametersArray[1];
-                dateofbirth = dateofbirth.Substring(1, dateofbirth.Length - 2);
-                DateTime date;
-                if (!DateTime.TryParseExact(dateofbirth, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.AssumeLocal, out date))
+                try
                 {
-                    Console.WriteLine("Incorrect date");
-                    return;
-                }
+                    string dateofbirth = parametersArray[1];
+                    dateofbirth = dateofbirth[1..^1];
+                    DateTime date;
+                    if (!DateTime.TryParseExact(dateofbirth, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.AssumeLocal, out date))
+                    {
+                        Console.WriteLine("Incorrect date");
+                        return;
+                    }
 
-                records = Program.fileCabinetService.FindDateOfBirth(date);
+                    records = Program.fileCabinetService.FindDateOfBirth(date);
+                }
+                catch (ArgumentException)
+                {
+                    Console.WriteLine("Record with that firstname not found");
+                }
             }
 
             foreach (var record in records)
@@ -263,6 +336,35 @@ namespace FileCabinetApp
             }
 
             Console.WriteLine();
+        }
+
+        private static T ReadInput<T>(Func<string, ValueTuple<bool, string, T>> converter, Func<T, ValueTuple<bool, string>> validator)
+        {
+            do
+            {
+                T value;
+
+                var input = Console.ReadLine();
+                var conversionResult = converter(input);
+
+                if (!conversionResult.Item1)
+                {
+                    Console.WriteLine($"Conversion failed: {conversionResult.Item2}. Please, correct your input.");
+                    continue;
+                }
+
+                value = conversionResult.Item3;
+
+                var validationResult = validator(value);
+                if (!validationResult.Item1)
+                {
+                    Console.WriteLine($"Validation failed: {validationResult.Item2}. Please, correct your input.");
+                    continue;
+                }
+
+                return value;
+            }
+            while (true);
         }
     }
 }
