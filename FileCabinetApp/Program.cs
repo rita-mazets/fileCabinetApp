@@ -209,7 +209,6 @@ namespace FileCabinetApp
 
         private static FileCabinetRecord Input()
         {
-            string dateString, typeString;
             string firstName, lastName;
             DateTime date;
             short height;
@@ -217,33 +216,22 @@ namespace FileCabinetApp
             char type;
 
             Console.Write("First name:");
-            firstName = Console.ReadLine();
+            firstName = ReadInput<string>(DataConverter.StringConverter, DataValidator.NameValidator);
 
             Console.Write("Last name:");
-            lastName = Console.ReadLine();
+            lastName = ReadInput<string>(DataConverter.StringConverter, DataValidator.NameValidator);
 
-            do
-            {
-                Console.Write("Date of birth:");
-                dateString = Console.ReadLine();
-            }
-            while (!DateTime.TryParseExact(dateString, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.AssumeLocal, out date));
+            Console.Write("Date of birth:");
+            date = ReadInput<DateTime>(DataConverter.DateConverter, DataValidator.DateValidator);
 
-            do
-            {
-                Console.Write("Height:");
-            }
-            while (!short.TryParse(Console.ReadLine(), out height));
+            Console.Write("Height:");
+            height = ReadInput<short>(DataConverter.ShortConverter, DataValidator.HeightValidator);
 
-            do
-            {
-                Console.Write("Salary:");
-            }
-            while (!decimal.TryParse(Console.ReadLine(), out salary));
+            Console.Write("Salary:");
+            salary = ReadInput<decimal>(DataConverter.DecimalConverter, DataValidator.SalaryValidator);
 
             Console.Write("Type:");
-            typeString = Console.ReadLine();
-            type = typeString[0];
+            type = ReadInput<char>(DataConverter.CharConverter, DataValidator.TypeValidator);
 
             return new FileCabinetRecord { FirstName = firstName, LastName = lastName, DateOfBirth = date, Height = height, Salary = salary, Type = type };
         }
@@ -312,7 +300,7 @@ namespace FileCabinetApp
                 try
                 {
                     string lastname = parametersArray[1];
-                    lastname = lastname[1..^2];
+                    lastname = lastname[1..^1];
                     records = Program.fileCabinetService.FindByLastName(lastname);
                 }
                 catch (ArgumentException)
@@ -326,7 +314,7 @@ namespace FileCabinetApp
                 try
                 {
                     string dateofbirth = parametersArray[1];
-                    dateofbirth = dateofbirth[1..^2];
+                    dateofbirth = dateofbirth[1..^1];
                     DateTime date;
                     if (!DateTime.TryParseExact(dateofbirth, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.AssumeLocal, out date))
                     {
@@ -348,6 +336,35 @@ namespace FileCabinetApp
             }
 
             Console.WriteLine();
+        }
+
+        private static T ReadInput<T>(Func<string, ValueTuple<bool, string, T>> converter, Func<T, ValueTuple<bool, string>> validator)
+        {
+            do
+            {
+                T value;
+
+                var input = Console.ReadLine();
+                var conversionResult = converter(input);
+
+                if (!conversionResult.Item1)
+                {
+                    Console.WriteLine($"Conversion failed: {conversionResult.Item2}. Please, correct your input.");
+                    continue;
+                }
+
+                value = conversionResult.Item3;
+
+                var validationResult = validator(value);
+                if (!validationResult.Item1)
+                {
+                    Console.WriteLine($"Validation failed: {validationResult.Item2}. Please, correct your input.");
+                    continue;
+                }
+
+                return value;
+            }
+            while (true);
         }
     }
 }
