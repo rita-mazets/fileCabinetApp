@@ -231,5 +231,14 @@ namespace FileCabinetApp
 
             return new ReadOnlyCollection<FileCabinetRecord>(this.dateOfBirthDictionary[dateOfBirth]);
         }
+
+        /// <summary>
+        /// Creates snapshot.
+        /// </summary>
+        /// <returns>Snapshot.</returns>
+        public FileCabinetServiceSnapshot MakeSnapshot()
+        {
+            return new FileCabinetServiceSnapshot(this.list);
+        }
     }
 }
