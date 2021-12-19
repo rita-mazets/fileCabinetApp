@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
+using System.Xml;
 using FileCabinetApp;
 
 namespace FileCabinetApp
@@ -30,6 +32,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("list", List),
             new Tuple<string, Action<string>>("edit", Edit),
             new Tuple<string, Action<string>>("find", Find),
+            new Tuple<string, Action<string>>("export", Export),
         };
 
         private static string[][] helpMessages = new string[][]
@@ -305,7 +308,7 @@ namespace FileCabinetApp
                 }
                 catch (ArgumentException)
                 {
-                    Console.WriteLine("Record with that lasrname not found");
+                    Console.WriteLine("Record with that lastname not found");
                 }
             }
 
@@ -365,6 +368,85 @@ namespace FileCabinetApp
                 return value;
             }
             while (true);
+        }
+
+        private static void Export(string parameters)
+        {
+            var parametersArray = parameters.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            if (parametersArray.Length < 2)
+            {
+                throw new ArgumentException("'export' must have more than 2 parameters", nameof(parameters));
+            }
+
+            string command = parametersArray[0].ToLower(CultureInfo.CurrentCulture);
+            string filePath = parametersArray[1];
+            if (!IsRewrite(filePath))
+            {
+                return;
+            }
+
+            if (command.ToLower(CultureInfo.CurrentCulture) == "csv")
+            {
+                try
+                {
+                    using (StreamWriter sw = new StreamWriter(filePath, false, System.Text.Encoding.Default))
+                    {
+                        sw.WriteLine("FirstName,LastName,DateOfBirth,Height,Salary,Type");
+
+                        var snapshot = fileCabinetService.MakeSnapshot();
+                        snapshot.SaveToCsv(sw);
+                        Console.WriteLine($"All records are exported to file {filePath}.");
+                    }
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    Console.WriteLine($"Export failed: can't open file {filePath}.");
+                }
+            }
+
+            if (command.ToLower(CultureInfo.CurrentCulture) == "xml")
+            {
+                try
+                {
+                    XmlWriterSettings settings = new XmlWriterSettings();
+                    settings.Indent = true;
+                    settings.NewLineOnAttributes = true;
+                    using (XmlWriter xw = XmlWriter.Create(filePath, settings))
+                    {
+                        var snapshot = fileCabinetService.MakeSnapshot();
+                        snapshot.SaveToXml(xw);
+                        Console.WriteLine($"All records are exported to file {filePath}.");
+                    }
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    Console.WriteLine($"Export failed: can't open file {filePath}.");
+                }
+            }
+        }
+
+        private static bool IsRewrite(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            string result = string.Empty;
+
+            if (File.Exists(path))
+            {
+                Console.WriteLine("File is exist - rewrite e:\filename.csv?[Y / n]");
+                result = Console.ReadLine();
+            }
+
+            if (result.ToLower(CultureInfo.CurrentCulture) == "y" || result.Length == 0)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }
