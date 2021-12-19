@@ -9,7 +9,7 @@ namespace FileCabinetApp
     /// <summary>
     /// Works with custom record.
     /// </summary>
-    public class FileCabinetCustomService : FileCabinetService
+    public class FileCabinetCustomService : FileCabinetMemoryService
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FileCabinetCustomService"/> class.

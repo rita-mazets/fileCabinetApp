@@ -9,7 +9,7 @@ namespace FileCabinetApp
     /// <summary>
     /// Works with default records.
     /// </summary>
-    public class FileCabinetDefaultService : FileCabinetService
+    public class FileCabinetDefaultService : FileCabinetMemoryService
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FileCabinetDefaultService"/> class.
