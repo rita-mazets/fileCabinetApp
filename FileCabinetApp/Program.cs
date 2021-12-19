@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
+using System.Xml;
 using FileCabinetApp;
 
 namespace FileCabinetApp
@@ -398,15 +399,30 @@ namespace FileCabinetApp
                         Console.WriteLine($"All records are exported to file {filePath}.");
                     }
                 }
-                catch(Exception e)
+                catch (DirectoryNotFoundException)
                 {
                     Console.WriteLine($"Export failed: can't open file {filePath}.");
-                    Console.WriteLine(e.GetType());
                 }
             }
 
             if (command.ToLower(CultureInfo.CurrentCulture) == "xml")
             {
+                try
+                {
+                    XmlWriterSettings settings = new XmlWriterSettings();
+                    settings.Indent = true;
+                    settings.NewLineOnAttributes = true;
+                    using (XmlWriter xw = XmlWriter.Create(filePath, settings))
+                    {
+                        var snapshot = fileCabinetService.MakeSnapshot();
+                        snapshot.SaveToXml(xw);
+                        Console.WriteLine($"All records are exported to file {filePath}.");
+                    }
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    Console.WriteLine($"Export failed: can't open file {filePath}.");
+                }
             }
         }
 

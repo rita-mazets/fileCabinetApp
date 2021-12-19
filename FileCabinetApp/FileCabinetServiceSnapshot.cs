@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace FileCabinetApp
 {
@@ -31,6 +32,16 @@ namespace FileCabinetApp
         {
             var csvWriter = new FileCabinetRecordCsvWriter(streamWriter);
             csvWriter.Write(this.list);
+        }
+
+        /// <summary>
+        /// Saves date do file.
+        /// </summary>
+        /// <param name="writer">Param to write.</param>
+        public void SaveToXml(XmlWriter writer)
+        {
+            var xmlWriter = new FileCabinetRecordXmlWriter(writer);
+            xmlWriter.Write(this.list);
         }
     }
 }
