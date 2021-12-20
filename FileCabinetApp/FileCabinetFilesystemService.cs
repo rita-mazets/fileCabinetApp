@@ -123,8 +123,6 @@ namespace FileCabinetApp
                 throw new ArgumentNullException(nameof(fileCabinetRecord));
             }
 
-            //var list = this.ReturnRecordList();
-
             this.fileStream.Seek(0, SeekOrigin.Begin);
             var recordBuffer = new byte[recordSize];
             int offset = 0;
@@ -142,14 +140,13 @@ namespace FileCabinetApp
                     record.Type = fileCabinetRecord.Type;
 
                     var recordToBytes = RecordToBytes(fileCabinetRecord);
-                    //this.fileStream.Seek(offset * recordSize, SeekOrigin.Begin);
                     this.fileStream.Seek(offset * recordSize, SeekOrigin.Begin);
                     this.fileStream.Write(recordToBytes, 0, recordToBytes.Length);
                     break;
                 }
+
                 offset++;
             }
-
         }
 
         /// <summary>
@@ -169,7 +166,9 @@ namespace FileCabinetApp
         /// <returns>Array where LastName is equal lastName.</returns>
         public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName)
         {
-            throw new NotImplementedException();
+            List<FileCabinetRecord> list = this.ReturnRecordList();
+            List<FileCabinetRecord> result = list.Where(item => item.LastName == lastName).ToList();
+            return new ReadOnlyCollection<FileCabinetRecord>(result);
         }
 
         /// <summary>
@@ -188,7 +187,6 @@ namespace FileCabinetApp
         /// <returns>All records.</returns>
         public ReadOnlyCollection<FileCabinetRecord> GetRecords()
         {
-            this.fileStream.Seek(0, SeekOrigin.Begin);
             List<FileCabinetRecord> list = this.ReturnRecordList();
 
             return new ReadOnlyCollection<FileCabinetRecord>(list);
@@ -196,6 +194,7 @@ namespace FileCabinetApp
 
         private List<FileCabinetRecord> ReturnRecordList()
         {
+            this.fileStream.Seek(0, SeekOrigin.Begin);
             List<FileCabinetRecord> list = new ();
             var recordBuffer = new byte[recordSize];
 
