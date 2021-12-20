@@ -21,7 +21,7 @@ namespace FileCabinetApp
 
         private static bool isRunning = true;
 
-        private static FileCabinetService fileCabinetService;
+        private static IFileCabinetService fileCabinetService;
 
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
         {
@@ -52,10 +52,12 @@ namespace FileCabinetApp
         /// <param name="args">Sets command line parameters.</param>
         public static void Main(string[] args)
         {
-            string nameValidationParam = ParseArgs(args);
+            string nameValidationParam, nameStorageParam;
+            (nameValidationParam, nameStorageParam) = ParseArgs(args);
 
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
             Console.WriteLine($"Using {nameValidationParam} validation rules.");
+            Console.WriteLine($"Using {nameStorageParam} cabinet service.");
             Console.WriteLine(Program.HintMessage);
             Console.WriteLine();
 
@@ -87,65 +89,111 @@ namespace FileCabinetApp
             while (isRunning);
         }
 
-        private static string ParseArgs(string[] argc)
+        private static (string, string) ParseArgs(string[] argc)
         {
             bool isValidationRules = false;
+            bool isStorageRules = false;
             bool isV = false;
+            bool isS = false;
             string nameValidationParam = "default";
+            string nameStorageParam = "memory";
+
             if (argc is not null)
             {
-                foreach (var item in argc)
+                //foreach (var item in argc)
+                    for(int i = 0; i< argc.Length; i++)
                 {
-                    if (item.ToLower(CultureInfo.CurrentCulture).Contains("--validation-rules="))
-                    {
-                        if (item.ToLower(CultureInfo.CurrentCulture).Contains("default"))
-                        {
-                            fileCabinetService = new FileCabinetService(new DefaultValidator());
-                            isValidationRules = true;
-                            nameValidationParam = "default";
-                        }
+                    //(nameValidationParam, isValidationRules, isV) = CheckParam(item, isValidationRules, isV, "--validation-rules=", "-v", "default", "custom");
+                    //(nameStorageParam, isStorageRules, isS) = CheckParam(item, isStorageRules, isS, "--storage=", "-s", "memory", "file");
 
-                        if (item.ToLower(CultureInfo.CurrentCulture).Contains("custom"))
+                    (nameValidationParam, isValidationRules, isV) = CheckParam(argc[i], isValidationRules, isV, "--validation-rules=", "-v", "default", "custom", nameValidationParam);
+                    if (i + 1 < argc.Length && isV && !isValidationRules)
+                    {
+                        (nameValidationParam, isValidationRules, isV) = CheckParam(argc[i + 1], isValidationRules, isV, "--validation-rules=", "-v", "default", "custom", nameValidationParam);
+                        if (!string.IsNullOrEmpty(nameValidationParam))
                         {
-                            isValidationRules = true;
-                            fileCabinetService = new FileCabinetService(new CustomValidator());
-                            nameValidationParam = "custom";
+                            i++;
                         }
                     }
 
-                    if (item.ToLower(CultureInfo.CurrentCulture).Equals("-v"))
-                    {
-                        isV = true;
-                    }
-
-                    if (isV)
-                    {
-                        if (item.ToLower(CultureInfo.CurrentCulture).Equals("default"))
-                        {
-                            fileCabinetService = new FileCabinetService(new DefaultValidator());
-                            isValidationRules = true;
-                            nameValidationParam = "default";
-                            isV = false;
-                        }
-
-                        if (item.ToLower(CultureInfo.CurrentCulture).Contains("custom"))
-                        {
-                            isValidationRules = true;
-                            fileCabinetService = new FileCabinetService(new CustomValidator());
-                            nameValidationParam = "custom";
-                            isV = false;
-                        }
-                    }
+                    (nameStorageParam, isStorageRules, isS) = CheckParam(argc[i], isStorageRules, isS, "--storage=", "-s", "memory", "file", nameStorageParam);
                 }
             }
 
             if (!isValidationRules)
             {
-                fileCabinetService = new FileCabinetService(new DefaultValidator());
                 nameValidationParam = "default";
             }
 
-            return nameValidationParam;
+            if (string.IsNullOrEmpty(nameStorageParam) || nameStorageParam.Equals("memory"))
+            {
+                if (nameValidationParam.Equals("default"))
+                {
+                    fileCabinetService = new FileCabinetMemoryService(new DefaultValidator());
+                }
+
+                if (nameValidationParam.Equals("custom"))
+                {
+                    fileCabinetService = new FileCabinetMemoryService(new CustomValidator());
+                }
+            }
+
+            if (nameStorageParam.Equals("file"))
+            {
+                if (nameValidationParam.Equals("default"))
+                {
+                    fileCabinetService = new FileCabinetFilesystemService(new FileStream("cabinet-records.db", FileMode.OpenOrCreate), new DefaultValidator());
+                }
+
+                if (nameValidationParam.Equals("custom"))
+                {
+                    fileCabinetService = new FileCabinetFilesystemService(new FileStream("cabinet-records.db", FileMode.OpenOrCreate), new CustomValidator());
+                }
+            }
+
+            return (nameValidationParam, nameStorageParam);
+        }
+
+        private static (string, bool, bool) CheckParam(string item, bool isRule, bool isShort, string fullNameParam, string shortNameParam, string regime1, string regime2, string nameParam)
+        {
+            if (item.ToLower(CultureInfo.CurrentCulture).Contains(fullNameParam))
+            {
+                if (item.ToLower(CultureInfo.CurrentCulture).Contains(regime1))
+                {
+                    isRule = true;
+                    nameParam = regime1;
+                }
+
+                if (item.ToLower(CultureInfo.CurrentCulture).Contains(regime2))
+                {
+                    isRule = true;
+                    nameParam = regime2;
+                }
+            }
+
+            if (item.ToLower(CultureInfo.CurrentCulture).Equals(shortNameParam))
+            {
+                isShort = true;
+            }
+
+            if (isShort)
+            {
+                if (item.ToLower(CultureInfo.CurrentCulture).Equals(regime1))
+                {
+                    isRule = true;
+                    nameParam = regime1;
+                    isShort = false;
+                }
+
+                if (item.ToLower(CultureInfo.CurrentCulture).Contains(regime2))
+                {
+                    isRule = true;
+                    nameParam = regime2;
+                    isShort = false;
+                }
+            }
+
+            return (nameParam, isRule, isShort);
         }
 
         private static void PrintMissedCommandInfo(string command)
@@ -246,6 +294,8 @@ namespace FileCabinetApp
             {
                 Console.WriteLine($"#{record.Id}, {record.FirstName}, {record.LastName}, {record.DateOfBirth:yyyy-MMM-dd}, {record.Height}, {record.Salary}, {record.Type}");
             }
+
+            Console.WriteLine();
         }
 
         private static void Edit(string parameters)
@@ -390,11 +440,12 @@ namespace FileCabinetApp
             {
                 try
                 {
-                    using (StreamWriter sw = new StreamWriter(filePath, false, System.Text.Encoding.Default))
+                    using (StreamWriter sw = new (filePath, false, System.Text.Encoding.Default))
                     {
                         sw.WriteLine("FirstName,LastName,DateOfBirth,Height,Salary,Type");
 
-                        var snapshot = fileCabinetService.MakeSnapshot();
+                        var fileCabinetService1 = (FileCabinetMemoryService)fileCabinetService;
+                        var snapshot = fileCabinetService1.MakeSnapshot();
                         snapshot.SaveToCsv(sw);
                         Console.WriteLine($"All records are exported to file {filePath}.");
                     }
@@ -409,12 +460,13 @@ namespace FileCabinetApp
             {
                 try
                 {
-                    XmlWriterSettings settings = new XmlWriterSettings();
+                    XmlWriterSettings settings = new ();
                     settings.Indent = true;
                     settings.NewLineOnAttributes = true;
                     using (XmlWriter xw = XmlWriter.Create(filePath, settings))
                     {
-                        var snapshot = fileCabinetService.MakeSnapshot();
+                        var fileCabinetService1 = (FileCabinetMemoryService)fileCabinetService;
+                        var snapshot = fileCabinetService1.MakeSnapshot();
                         snapshot.SaveToXml(xw);
                         Console.WriteLine($"All records are exported to file {filePath}.");
                     }
