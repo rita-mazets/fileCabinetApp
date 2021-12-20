@@ -142,12 +142,12 @@ namespace FileCabinetApp
             {
                 if (nameValidationParam.Equals("default"))
                 {
-                    fileCabinetService = new FileCabinetFilesystemService(new FileStream("cabinet-records.db", FileMode.Append), new DefaultValidator());
+                    fileCabinetService = new FileCabinetFilesystemService(new FileStream("cabinet-records.db", FileMode.OpenOrCreate), new DefaultValidator());
                 }
 
                 if (nameValidationParam.Equals("custom"))
                 {
-                    fileCabinetService = new FileCabinetFilesystemService(new FileStream("cabinet-records.db", FileMode.Append), new CustomValidator());
+                    fileCabinetService = new FileCabinetFilesystemService(new FileStream("cabinet-records.db", FileMode.OpenOrCreate), new CustomValidator());
                 }
             }
 
