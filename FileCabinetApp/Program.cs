@@ -21,7 +21,7 @@ namespace FileCabinetApp
 
         private static bool isRunning = true;
 
-        private static FileCabinetService fileCabinetService;
+        private static IFileCabinetService fileCabinetService;
 
         private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
         {
@@ -52,10 +52,12 @@ namespace FileCabinetApp
         /// <param name="args">Sets command line parameters.</param>
         public static void Main(string[] args)
         {
-            string nameValidationParam = ParseArgs(args);
+            string nameValidationParam, nameStorageParam;
+            (nameValidationParam, nameStorageParam) = ParseArgs(args);
 
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
             Console.WriteLine($"Using {nameValidationParam} validation rules.");
+            Console.WriteLine($"Using {nameStorageParam} cabinet service.");
             Console.WriteLine(Program.HintMessage);
             Console.WriteLine();
 
@@ -87,65 +89,176 @@ namespace FileCabinetApp
             while (isRunning);
         }
 
-        private static string ParseArgs(string[] argc)
+        private static (string, string) ParseArgs(string[] argc)
         {
             bool isValidationRules = false;
+            bool isStorageRules = false;
             bool isV = false;
-            string nameValidationParam = "default";
+            bool isS = false;
+            string nameValidationParam = string.Empty;
+            string nameStorageParam = string.Empty;
+
+            /*for (int i = 0; i < argc.Length - 1; i++)
+            {
+                if ((argc[i].ToLower(CultureInfo.CurrentCulture).Contains("--validation-rules=") && (argc[i].ToLower(CultureInfo.CurrentCulture).Contains("default") || argc[i].ToLower(CultureInfo.CurrentCulture).Contains("custom")))
+                    || (argc[i].ToLower(CultureInfo.CurrentCulture).Equals("-v") && (argc[i + 1].ToLower(CultureInfo.CurrentCulture).Equals("default") || argc[i + 1].ToLower(CultureInfo.CurrentCulture).Equals("custom"))))
+                {
+                    isValidationRules = true;
+                }
+
+                if ((argc[i].ToLower(CultureInfo.CurrentCulture).Contains("--storage=") && (argc[i].ToLower(CultureInfo.CurrentCulture).Contains("memory") || argc[i].ToLower(CultureInfo.CurrentCulture).Contains("file")))
+                    || (argc[i].ToLower(CultureInfo.CurrentCulture).Equals("-s") && (argc[i + 1].ToLower(CultureInfo.CurrentCulture).Equals("memory") || argc[i + 1].ToLower(CultureInfo.CurrentCulture).Equals("file"))))
+                {
+                    isStorage = true;
+                }
+            }*/
+
             if (argc is not null)
             {
                 foreach (var item in argc)
                 {
-                    if (item.ToLower(CultureInfo.CurrentCulture).Contains("--validation-rules="))
+                    /*if (item.ToLower(CultureInfo.CurrentCulture).Contains("--validation-rules="))
                     {
                         if (item.ToLower(CultureInfo.CurrentCulture).Contains("default"))
                         {
-                            fileCabinetService = new FileCabinetService(new DefaultValidator());
+                            //fileCabinetService = new FileCabinetMemoryService(new DefaultValidator());
                             isValidationRules = true;
                             nameValidationParam = "default";
+                            continue;
                         }
 
                         if (item.ToLower(CultureInfo.CurrentCulture).Contains("custom"))
                         {
                             isValidationRules = true;
-                            fileCabinetService = new FileCabinetService(new CustomValidator());
+                            //fileCabinetService = new FileCabinetMemoryService(new CustomValidator());
                             nameValidationParam = "custom";
+                            continue;
                         }
                     }
 
                     if (item.ToLower(CultureInfo.CurrentCulture).Equals("-v"))
                     {
                         isV = true;
+                        continue;
                     }
 
                     if (isV)
                     {
                         if (item.ToLower(CultureInfo.CurrentCulture).Equals("default"))
                         {
-                            fileCabinetService = new FileCabinetService(new DefaultValidator());
+                            //fileCabinetService = new FileCabinetMemoryService(new DefaultValidator());
                             isValidationRules = true;
                             nameValidationParam = "default";
                             isV = false;
+                            continue;
                         }
 
                         if (item.ToLower(CultureInfo.CurrentCulture).Contains("custom"))
                         {
                             isValidationRules = true;
-                            fileCabinetService = new FileCabinetService(new CustomValidator());
+                            //fileCabinetService = new FileCabinetMemoryService(new CustomValidator());
                             nameValidationParam = "custom";
                             isV = false;
+                            continue;
                         }
                     }
+
+
+                    if (item.ToLower(CultureInfo.CurrentCulture).Contains("--storage="))
+                    {
+                        if (item.ToLower(CultureInfo.CurrentCulture).Contains("memory"))
+                        {
+                            //fileCabinetService = new FileCabinetMemoryService(new DefaultValidator());
+                            isStorage = true;
+                            nameStorage = "memory";
+                            continue;
+                        }
+
+                        if (item.ToLower(CultureInfo.CurrentCulture).Contains("file"))
+                        {
+                            //fileCabinetService = new FileCabinetMemoryService(new CustomValidator());
+                            isStorage = true;
+                            nameStorage = "file";
+                            continue;
+                        }
+                    }*/
+                    (nameValidationParam, isValidationRules, isV) = CheckParam(item, isValidationRules, isV, "--validation-rules=", "-v", "default", "custom");
+                    (nameStorageParam, isStorageRules, isS) = CheckParam(item, isStorageRules, isS, "--storage=", "-s", "memory", "file");
+
                 }
             }
 
             if (!isValidationRules)
             {
-                fileCabinetService = new FileCabinetService(new DefaultValidator());
                 nameValidationParam = "default";
             }
 
-            return nameValidationParam;
+            if (string.IsNullOrEmpty(nameStorageParam) || nameStorageParam.Equals("memory"))
+            {
+                if (nameValidationParam.Equals("default"))
+                {
+                    fileCabinetService = new FileCabinetMemoryService(new DefaultValidator());
+                }
+
+                if (nameValidationParam.Equals("custom"))
+                {
+                    fileCabinetService = new FileCabinetMemoryService(new CustomValidator());
+                }
+            }
+
+            if (nameStorageParam.Equals("file"))
+            {
+                fileCabinetService = new FileCabinetFilesystemService(new FileStream("cabinet-records.db", FileMode.OpenOrCreate));
+            }
+
+            return (nameValidationParam, nameStorageParam);
+        }
+
+        private static (string, bool, bool) CheckParam(string item, bool isRule, bool isShort, string fullNameParam, string shortNameParam, string regime1, string regime2)
+        {
+            string nameParam = string.Empty;
+            if (item.ToLower(CultureInfo.CurrentCulture).Contains(fullNameParam))
+            {
+                if (item.ToLower(CultureInfo.CurrentCulture).Contains(regime1))
+                {
+                    //fileCabinetService = new FileCabinetMemoryService(new DefaultValidator());
+                    isRule = true;
+                    nameParam = regime1;
+                }
+
+                if (item.ToLower(CultureInfo.CurrentCulture).Contains(regime2))
+                {
+                    isRule = true;
+                    //fileCabinetService = new FileCabinetMemoryService(new CustomValidator());
+                    nameParam = regime2;
+                }
+            }
+
+            if (item.ToLower(CultureInfo.CurrentCulture).Equals(shortNameParam))
+            {
+                isShort = true;
+            }
+
+            if (isShort)
+            {
+                if (item.ToLower(CultureInfo.CurrentCulture).Equals(regime1))
+                {
+                    //fileCabinetService = new FileCabinetMemoryService(new DefaultValidator());
+                    isRule = true;
+                    nameParam = regime1;
+                    isShort = false;
+                }
+
+                if (item.ToLower(CultureInfo.CurrentCulture).Contains(regime2))
+                {
+                    isRule = true;
+                    //fileCabinetService = new FileCabinetMemoryService(new CustomValidator());
+                    nameParam =regime2;
+                    isShort = false;
+                }
+            }
+
+            return (nameParam, isRule, isShort);
         }
 
         private static void PrintMissedCommandInfo(string command)
@@ -394,7 +507,8 @@ namespace FileCabinetApp
                     {
                         sw.WriteLine("FirstName,LastName,DateOfBirth,Height,Salary,Type");
 
-                        var snapshot = fileCabinetService.MakeSnapshot();
+                        var fileCabinetService1 = (FileCabinetMemoryService)fileCabinetService;
+                        var snapshot = fileCabinetService1.MakeSnapshot();
                         snapshot.SaveToCsv(sw);
                         Console.WriteLine($"All records are exported to file {filePath}.");
                     }
@@ -414,7 +528,8 @@ namespace FileCabinetApp
                     settings.NewLineOnAttributes = true;
                     using (XmlWriter xw = XmlWriter.Create(filePath, settings))
                     {
-                        var snapshot = fileCabinetService.MakeSnapshot();
+                        var fileCabinetService1 = (FileCabinetMemoryService)fileCabinetService;
+                        var snapshot = fileCabinetService1.MakeSnapshot();
                         snapshot.SaveToXml(xw);
                         Console.WriteLine($"All records are exported to file {filePath}.");
                     }
