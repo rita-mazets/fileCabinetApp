@@ -42,7 +42,7 @@ namespace FileCabinetApp
             this.recordValidator.ValidateParameters(fileCabinetRecord);
 
             List<byte[]> list = new ();
-            fileCabinetRecord.Id = (int)(this.fileStream.Length / 142) + 1;
+            fileCabinetRecord.Id = this.GetStat() + 1;
             list.Add(BitConverter.GetBytes(fileCabinetRecord.Id));
             list.Add(System.Text.Encoding.UTF8.GetBytes(fileCabinetRecord.FirstName.PadRight(60)));
             list.Add(System.Text.Encoding.UTF8.GetBytes(fileCabinetRecord.LastName.PadRight(60)));
@@ -57,8 +57,6 @@ namespace FileCabinetApp
             {
                 this.fileStream.Write(item, 0, item.Length);
             }
-
-            Console.WriteLine(fileStream.Length);
 
             return fileCabinetRecord.Id;
         }
@@ -117,7 +115,7 @@ namespace FileCabinetApp
         /// <returns>Record count.</returns>
         public int GetStat()
         {
-            throw new NotImplementedException();
+            return (int)(this.fileStream.Length / 142);
         }
     }
 }
