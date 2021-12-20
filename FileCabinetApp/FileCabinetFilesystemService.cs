@@ -156,7 +156,9 @@ namespace FileCabinetApp
         /// <returns>Array where FirstName is equal firstName.</returns>
         public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
         {
-            throw new NotImplementedException();
+            List<FileCabinetRecord> list = this.ReturnRecordList();
+            List<FileCabinetRecord> result = list.Where(item => item.FirstName == firstName).ToList();
+            return new ReadOnlyCollection<FileCabinetRecord>(result);
         }
 
         /// <summary>
@@ -178,7 +180,9 @@ namespace FileCabinetApp
         /// <returns>Array where DateOfBirth is equal dateOfBirth.</returns>
         public ReadOnlyCollection<FileCabinetRecord> FindDateOfBirth(DateTime dateOfBirth)
         {
-            throw new NotImplementedException();
+            List<FileCabinetRecord> list = this.ReturnRecordList();
+            List<FileCabinetRecord> result = list.Where(item => item.DateOfBirth == dateOfBirth).ToList();
+            return new ReadOnlyCollection<FileCabinetRecord>(result);
         }
 
         /// <summary>

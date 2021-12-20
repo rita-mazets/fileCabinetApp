@@ -294,6 +294,8 @@ namespace FileCabinetApp
             {
                 Console.WriteLine($"#{record.Id}, {record.FirstName}, {record.LastName}, {record.DateOfBirth:yyyy-MMM-dd}, {record.Height}, {record.Salary}, {record.Type}");
             }
+
+            Console.WriteLine();
         }
 
         private static void Edit(string parameters)
