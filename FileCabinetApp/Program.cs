@@ -100,12 +100,8 @@ namespace FileCabinetApp
 
             if (argc is not null)
             {
-                //foreach (var item in argc)
-                    for(int i = 0; i< argc.Length; i++)
+                for (int i = 0; i < argc.Length; i++)
                 {
-                    //(nameValidationParam, isValidationRules, isV) = CheckParam(item, isValidationRules, isV, "--validation-rules=", "-v", "default", "custom");
-                    //(nameStorageParam, isStorageRules, isS) = CheckParam(item, isStorageRules, isS, "--storage=", "-s", "memory", "file");
-
                     (nameValidationParam, isValidationRules, isV) = CheckParam(argc[i], isValidationRules, isV, "--validation-rules=", "-v", "default", "custom", nameValidationParam);
                     if (i + 1 < argc.Length && isV && !isValidationRules)
                     {
@@ -289,6 +285,7 @@ namespace FileCabinetApp
 
         private static void List(string parameters)
         {
+            Console.WriteLine();
             var records = fileCabinetService.GetRecords();
             foreach (var record in records)
             {
@@ -300,6 +297,7 @@ namespace FileCabinetApp
 
         private static void Edit(string parameters)
         {
+            Console.WriteLine();
             int id;
 
             if (!int.TryParse(parameters, out id))
@@ -320,6 +318,8 @@ namespace FileCabinetApp
             {
                 Console.WriteLine($"#{id} record is not found.");
             }
+
+            Console.WriteLine();
         }
 
         private static void Find(string parameters)
