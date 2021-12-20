@@ -118,7 +118,38 @@ namespace FileCabinetApp
         /// <param name="fileCabinetRecord">Parameter to edit data.</param>
         public void EditRecord(FileCabinetRecord fileCabinetRecord)
         {
-            throw new NotImplementedException();
+            if (fileCabinetRecord is null)
+            {
+                throw new ArgumentNullException(nameof(fileCabinetRecord));
+            }
+
+            //var list = this.ReturnRecordList();
+
+            this.fileStream.Seek(0, SeekOrigin.Begin);
+            var recordBuffer = new byte[recordSize];
+            int offset = 0;
+
+            while (this.fileStream.Read(recordBuffer, 0, recordBuffer.Length) > 0)
+            {
+                var record = BytesToFileCabinetRecord(recordBuffer);
+                if (record.Id == fileCabinetRecord.Id)
+                {
+                    record.FirstName = fileCabinetRecord.FirstName;
+                    record.LastName = fileCabinetRecord.LastName;
+                    record.DateOfBirth = fileCabinetRecord.DateOfBirth;
+                    record.Height = fileCabinetRecord.Height;
+                    record.Salary = fileCabinetRecord.Salary;
+                    record.Type = fileCabinetRecord.Type;
+
+                    var recordToBytes = RecordToBytes(fileCabinetRecord);
+                    //this.fileStream.Seek(offset * recordSize, SeekOrigin.Begin);
+                    this.fileStream.Seek(offset * recordSize, SeekOrigin.Begin);
+                    this.fileStream.Write(recordToBytes, 0, recordToBytes.Length);
+                    break;
+                }
+                offset++;
+            }
+
         }
 
         /// <summary>
@@ -158,6 +189,13 @@ namespace FileCabinetApp
         public ReadOnlyCollection<FileCabinetRecord> GetRecords()
         {
             this.fileStream.Seek(0, SeekOrigin.Begin);
+            List<FileCabinetRecord> list = this.ReturnRecordList();
+
+            return new ReadOnlyCollection<FileCabinetRecord>(list);
+        }
+
+        private List<FileCabinetRecord> ReturnRecordList()
+        {
             List<FileCabinetRecord> list = new ();
             var recordBuffer = new byte[recordSize];
 
@@ -167,7 +205,7 @@ namespace FileCabinetApp
                 list.Add(record);
             }
 
-            return new ReadOnlyCollection<FileCabinetRecord>(list);
+            return list;
         }
 
         /// <summary>
