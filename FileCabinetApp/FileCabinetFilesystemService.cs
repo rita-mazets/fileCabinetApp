@@ -14,14 +14,17 @@ namespace FileCabinetApp
     public class FileCabinetFilesystemService : IFileCabinetService
     {
         private FileStream fileStream;
+        private IRecordValidator recordValidator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileCabinetFilesystemService"/> class.
         /// </summary>
         /// <param name="fileStream">Parameter to initialize fileStream.</param>
-        public FileCabinetFilesystemService(FileStream fileStream)
+        /// /// <param name="recordValidator">Parameter to initialize recordValidator.</param>
+        public FileCabinetFilesystemService(FileStream fileStream, IRecordValidator recordValidator)
         {
             this.fileStream = fileStream;
+            this.recordValidator = recordValidator;
         }
 
         /// <summary>
