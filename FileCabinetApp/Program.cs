@@ -95,96 +95,28 @@ namespace FileCabinetApp
             bool isStorageRules = false;
             bool isV = false;
             bool isS = false;
-            string nameValidationParam = string.Empty;
-            string nameStorageParam = string.Empty;
-
-            /*for (int i = 0; i < argc.Length - 1; i++)
-            {
-                if ((argc[i].ToLower(CultureInfo.CurrentCulture).Contains("--validation-rules=") && (argc[i].ToLower(CultureInfo.CurrentCulture).Contains("default") || argc[i].ToLower(CultureInfo.CurrentCulture).Contains("custom")))
-                    || (argc[i].ToLower(CultureInfo.CurrentCulture).Equals("-v") && (argc[i + 1].ToLower(CultureInfo.CurrentCulture).Equals("default") || argc[i + 1].ToLower(CultureInfo.CurrentCulture).Equals("custom"))))
-                {
-                    isValidationRules = true;
-                }
-
-                if ((argc[i].ToLower(CultureInfo.CurrentCulture).Contains("--storage=") && (argc[i].ToLower(CultureInfo.CurrentCulture).Contains("memory") || argc[i].ToLower(CultureInfo.CurrentCulture).Contains("file")))
-                    || (argc[i].ToLower(CultureInfo.CurrentCulture).Equals("-s") && (argc[i + 1].ToLower(CultureInfo.CurrentCulture).Equals("memory") || argc[i + 1].ToLower(CultureInfo.CurrentCulture).Equals("file"))))
-                {
-                    isStorage = true;
-                }
-            }*/
+            string nameValidationParam = "default";
+            string nameStorageParam = "memory";
 
             if (argc is not null)
             {
-                foreach (var item in argc)
+                //foreach (var item in argc)
+                    for(int i = 0; i< argc.Length; i++)
                 {
-                    /*if (item.ToLower(CultureInfo.CurrentCulture).Contains("--validation-rules="))
-                    {
-                        if (item.ToLower(CultureInfo.CurrentCulture).Contains("default"))
-                        {
-                            //fileCabinetService = new FileCabinetMemoryService(new DefaultValidator());
-                            isValidationRules = true;
-                            nameValidationParam = "default";
-                            continue;
-                        }
+                    //(nameValidationParam, isValidationRules, isV) = CheckParam(item, isValidationRules, isV, "--validation-rules=", "-v", "default", "custom");
+                    //(nameStorageParam, isStorageRules, isS) = CheckParam(item, isStorageRules, isS, "--storage=", "-s", "memory", "file");
 
-                        if (item.ToLower(CultureInfo.CurrentCulture).Contains("custom"))
+                    (nameValidationParam, isValidationRules, isV) = CheckParam(argc[i], isValidationRules, isV, "--validation-rules=", "-v", "default", "custom", nameValidationParam);
+                    if (i + 1 < argc.Length && isV && !isValidationRules)
+                    {
+                        (nameValidationParam, isValidationRules, isV) = CheckParam(argc[i + 1], isValidationRules, isV, "--validation-rules=", "-v", "default", "custom", nameValidationParam);
+                        if (!string.IsNullOrEmpty(nameValidationParam))
                         {
-                            isValidationRules = true;
-                            //fileCabinetService = new FileCabinetMemoryService(new CustomValidator());
-                            nameValidationParam = "custom";
-                            continue;
+                            i++;
                         }
                     }
 
-                    if (item.ToLower(CultureInfo.CurrentCulture).Equals("-v"))
-                    {
-                        isV = true;
-                        continue;
-                    }
-
-                    if (isV)
-                    {
-                        if (item.ToLower(CultureInfo.CurrentCulture).Equals("default"))
-                        {
-                            //fileCabinetService = new FileCabinetMemoryService(new DefaultValidator());
-                            isValidationRules = true;
-                            nameValidationParam = "default";
-                            isV = false;
-                            continue;
-                        }
-
-                        if (item.ToLower(CultureInfo.CurrentCulture).Contains("custom"))
-                        {
-                            isValidationRules = true;
-                            //fileCabinetService = new FileCabinetMemoryService(new CustomValidator());
-                            nameValidationParam = "custom";
-                            isV = false;
-                            continue;
-                        }
-                    }
-
-
-                    if (item.ToLower(CultureInfo.CurrentCulture).Contains("--storage="))
-                    {
-                        if (item.ToLower(CultureInfo.CurrentCulture).Contains("memory"))
-                        {
-                            //fileCabinetService = new FileCabinetMemoryService(new DefaultValidator());
-                            isStorage = true;
-                            nameStorage = "memory";
-                            continue;
-                        }
-
-                        if (item.ToLower(CultureInfo.CurrentCulture).Contains("file"))
-                        {
-                            //fileCabinetService = new FileCabinetMemoryService(new CustomValidator());
-                            isStorage = true;
-                            nameStorage = "file";
-                            continue;
-                        }
-                    }*/
-                    (nameValidationParam, isValidationRules, isV) = CheckParam(item, isValidationRules, isV, "--validation-rules=", "-v", "default", "custom");
-                    (nameStorageParam, isStorageRules, isS) = CheckParam(item, isStorageRules, isS, "--storage=", "-s", "memory", "file");
-
+                    (nameStorageParam, isStorageRules, isS) = CheckParam(argc[i], isStorageRules, isS, "--storage=", "-s", "memory", "file", nameStorageParam);
                 }
             }
 
@@ -208,20 +140,26 @@ namespace FileCabinetApp
 
             if (nameStorageParam.Equals("file"))
             {
-                fileCabinetService = new FileCabinetFilesystemService(new FileStream("cabinet-records.db", FileMode.OpenOrCreate));
+                if (nameValidationParam.Equals("default"))
+                {
+                    fileCabinetService = new FileCabinetFilesystemService(new FileStream("cabinet-records.db", FileMode.Append), new DefaultValidator());
+                }
+
+                if (nameValidationParam.Equals("custom"))
+                {
+                    fileCabinetService = new FileCabinetFilesystemService(new FileStream("cabinet-records.db", FileMode.Append), new CustomValidator());
+                }
             }
 
             return (nameValidationParam, nameStorageParam);
         }
 
-        private static (string, bool, bool) CheckParam(string item, bool isRule, bool isShort, string fullNameParam, string shortNameParam, string regime1, string regime2)
+        private static (string, bool, bool) CheckParam(string item, bool isRule, bool isShort, string fullNameParam, string shortNameParam, string regime1, string regime2, string nameParam)
         {
-            string nameParam = string.Empty;
             if (item.ToLower(CultureInfo.CurrentCulture).Contains(fullNameParam))
             {
                 if (item.ToLower(CultureInfo.CurrentCulture).Contains(regime1))
                 {
-                    //fileCabinetService = new FileCabinetMemoryService(new DefaultValidator());
                     isRule = true;
                     nameParam = regime1;
                 }
@@ -229,7 +167,6 @@ namespace FileCabinetApp
                 if (item.ToLower(CultureInfo.CurrentCulture).Contains(regime2))
                 {
                     isRule = true;
-                    //fileCabinetService = new FileCabinetMemoryService(new CustomValidator());
                     nameParam = regime2;
                 }
             }
@@ -243,7 +180,6 @@ namespace FileCabinetApp
             {
                 if (item.ToLower(CultureInfo.CurrentCulture).Equals(regime1))
                 {
-                    //fileCabinetService = new FileCabinetMemoryService(new DefaultValidator());
                     isRule = true;
                     nameParam = regime1;
                     isShort = false;
@@ -252,8 +188,7 @@ namespace FileCabinetApp
                 if (item.ToLower(CultureInfo.CurrentCulture).Contains(regime2))
                 {
                     isRule = true;
-                    //fileCabinetService = new FileCabinetMemoryService(new CustomValidator());
-                    nameParam =regime2;
+                    nameParam = regime2;
                     isShort = false;
                 }
             }
@@ -503,7 +438,7 @@ namespace FileCabinetApp
             {
                 try
                 {
-                    using (StreamWriter sw = new StreamWriter(filePath, false, System.Text.Encoding.Default))
+                    using (StreamWriter sw = new (filePath, false, System.Text.Encoding.Default))
                     {
                         sw.WriteLine("FirstName,LastName,DateOfBirth,Height,Salary,Type");
 
@@ -523,7 +458,7 @@ namespace FileCabinetApp
             {
                 try
                 {
-                    XmlWriterSettings settings = new XmlWriterSettings();
+                    XmlWriterSettings settings = new ();
                     settings.Indent = true;
                     settings.NewLineOnAttributes = true;
                     using (XmlWriter xw = XmlWriter.Create(filePath, settings))

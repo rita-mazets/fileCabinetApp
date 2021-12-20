@@ -34,7 +34,33 @@ namespace FileCabinetApp
         /// <returns>Record id.</returns>
         public int CreateRecord(FileCabinetRecord fileCabinetRecord)
         {
-            throw new NotImplementedException();
+            if (fileCabinetRecord is null)
+            {
+                throw new ArgumentNullException(nameof(fileCabinetRecord));
+            }
+
+            this.recordValidator.ValidateParameters(fileCabinetRecord);
+
+            List<byte[]> list = new ();
+            fileCabinetRecord.Id = (int)(this.fileStream.Length / 142) + 1;
+            list.Add(BitConverter.GetBytes(fileCabinetRecord.Id));
+            list.Add(System.Text.Encoding.UTF8.GetBytes(fileCabinetRecord.FirstName.PadRight(60)));
+            list.Add(System.Text.Encoding.UTF8.GetBytes(fileCabinetRecord.LastName.PadRight(60)));
+            list.Add(BitConverter.GetBytes(fileCabinetRecord.DateOfBirth.Year));
+            list.Add(BitConverter.GetBytes(fileCabinetRecord.DateOfBirth.Month));
+            list.Add(BitConverter.GetBytes(fileCabinetRecord.DateOfBirth.Day));
+            list.Add(BitConverter.GetBytes(fileCabinetRecord.Height));
+            list.Add(BitConverter.GetBytes(decimal.ToByte(fileCabinetRecord.Salary)));
+            list.Add(BitConverter.GetBytes(fileCabinetRecord.Type));
+
+            foreach (var item in list)
+            {
+                this.fileStream.Write(item, 0, item.Length);
+            }
+
+            Console.WriteLine(fileStream.Length);
+
+            return fileCabinetRecord.Id;
         }
 
         /// <summary>
