@@ -264,8 +264,7 @@ namespace FileCabinetApp
                     }
                     else
                     {
-                        this.list.Remove(this.list.Where(item => item.Id == record.Id).First());
-                        this.list.Add(record);
+                        this.EditRecord(record);
                     }
                 }
                 catch (ArgumentException e)

@@ -219,5 +219,41 @@ namespace FileCabinetApp
         {
             return (int)(this.fileStream.Length / recordSize);
         }
+
+        /// <summary>
+        /// Creates snapshot.
+        /// </summary>
+        /// <returns>Snapshot.</returns>
+        public ReadOnlyCollection<FileCabinetRecord> Restore(FileCabinetServiceSnapshot snapshot)
+        {
+            if (snapshot is null)
+            {
+                throw new ArgumentNullException(nameof(snapshot));
+            }
+
+            var recordsInFile = this.GetRecords();
+            foreach (var record in snapshot.Records)
+            {
+                try
+                {
+                    this.recordValidator.ValidateParameters(record);
+
+                    if (!recordsInFile.Where(item => item.Id == record.Id).Any())
+                    {
+                        this.CreateRecord(record);
+                    }
+                    else
+                    {
+                        this.EditRecord(record);
+                    }
+                }
+                catch (ArgumentException e)
+                {
+                    Console.WriteLine($"Error!{e.Message}. Record:{record.Id}");
+                }
+            }
+
+            return snapshot.Records;
+        }
     }
 }
