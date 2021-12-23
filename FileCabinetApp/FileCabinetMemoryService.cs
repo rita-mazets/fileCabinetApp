@@ -240,5 +240,41 @@ namespace FileCabinetApp
         {
             return new FileCabinetServiceSnapshot(this.list);
         }
+
+        /// <summary>
+        /// Creates snapshot.
+        /// </summary>
+        /// <returns>Snapshot.</returns>
+        public ReadOnlyCollection<FileCabinetRecord> Restore(FileCabinetServiceSnapshot snapshot)
+        {
+            if (snapshot is null)
+            {
+                throw new ArgumentNullException(nameof(snapshot));
+            }
+
+            var records = snapshot.Records;
+            foreach (var record in snapshot.Records)
+            {
+                try
+                {
+                    this.recordValidator.ValidateParameters(record);
+                    if (!this.list.Where(item => item.Id == record.Id).Any())
+                    {
+                        this.InsertIntoCollection(record, record.FirstName, record.LastName, record.DateOfBirth);
+                    }
+                    else
+                    {
+                        this.list.Remove(this.list.Where(item => item.Id == record.Id).First());
+                        this.list.Add(record);
+                    }
+                }
+                catch (ArgumentException e)
+                {
+                    Console.WriteLine($"Error!{e.Message}. Record:{record.Id}");
+                }
+            }
+
+            return snapshot.Records;
+        }
     }
 }

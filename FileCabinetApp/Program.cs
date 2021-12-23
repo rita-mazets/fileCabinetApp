@@ -33,6 +33,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("edit", Edit),
             new Tuple<string, Action<string>>("find", Find),
             new Tuple<string, Action<string>>("export", Export),
+            new Tuple<string, Action<string>>("import", Import),
         };
 
         private static string[][] helpMessages = new string[][]
@@ -44,6 +45,8 @@ namespace FileCabinetApp
             new string[] { "list", "prints all records", "The 'list' command prints all records. " },
             new string[] { "edit", "allows to edit record ", "The 'edit' command allows to edit record. " },
             new string[] { "find", "allows to find record ", "The 'find' command allows to find record. " },
+            new string[] { "export", "exports to csv or xml ", "The 'export' command exports to csv or xml " },
+            new string[] { "import", "import from csv or xml ", "The 'import' command import from csv or xml " },
         };
 
         /// <summary>
@@ -438,43 +441,53 @@ namespace FileCabinetApp
 
             if (command.ToLower(CultureInfo.CurrentCulture) == "csv")
             {
-                try
-                {
-                    using (StreamWriter sw = new (filePath, false, System.Text.Encoding.Default))
-                    {
-                        sw.WriteLine("FirstName,LastName,DateOfBirth,Height,Salary,Type");
-
-                        var fileCabinetService1 = (FileCabinetMemoryService)fileCabinetService;
-                        var snapshot = fileCabinetService1.MakeSnapshot();
-                        snapshot.SaveToCsv(sw);
-                        Console.WriteLine($"All records are exported to file {filePath}.");
-                    }
-                }
-                catch (DirectoryNotFoundException)
-                {
-                    Console.WriteLine($"Export failed: can't open file {filePath}.");
-                }
+                ExportCsv(filePath);
             }
 
             if (command.ToLower(CultureInfo.CurrentCulture) == "xml")
             {
-                try
+                ExportXml(filePath);
+            }
+        }
+
+        private static void ExportCsv(string filePath)
+        {
+            try
+            {
+                using (StreamWriter sw = new(filePath, false, System.Text.Encoding.Default))
                 {
-                    XmlWriterSettings settings = new ();
-                    settings.Indent = true;
-                    settings.NewLineOnAttributes = true;
-                    using (XmlWriter xw = XmlWriter.Create(filePath, settings))
-                    {
-                        var fileCabinetService1 = (FileCabinetMemoryService)fileCabinetService;
-                        var snapshot = fileCabinetService1.MakeSnapshot();
-                        snapshot.SaveToXml(xw);
-                        Console.WriteLine($"All records are exported to file {filePath}.");
-                    }
+                    sw.WriteLine("Id,FirstName,LastName,DateOfBirth,Height,Salary,Type");
+
+                    var fileCabinetService1 = (FileCabinetMemoryService)fileCabinetService;
+                    var snapshot = fileCabinetService1.MakeSnapshot();
+                    snapshot.SaveToCsv(sw);
+                    Console.WriteLine($"All records are exported to file {filePath}.");
                 }
-                catch (DirectoryNotFoundException)
+            }
+            catch (DirectoryNotFoundException)
+            {
+                Console.WriteLine($"Export failed: can't open file {filePath}.");
+            }
+        }
+
+        private static void ExportXml(string filePath)
+        {
+            try
+            {
+                XmlWriterSettings settings = new();
+                settings.Indent = true;
+                settings.NewLineOnAttributes = true;
+                using (XmlWriter xw = XmlWriter.Create(filePath, settings))
                 {
-                    Console.WriteLine($"Export failed: can't open file {filePath}.");
+                    var fileCabinetService1 = (FileCabinetMemoryService)fileCabinetService;
+                    var snapshot = fileCabinetService1.MakeSnapshot();
+                    snapshot.SaveToXml(xw);
+                    Console.WriteLine($"All records are exported to file {filePath}.");
                 }
+            }
+            catch (DirectoryNotFoundException)
+            {
+                Console.WriteLine($"Export failed: can't open file {filePath}.");
             }
         }
 
@@ -499,6 +512,56 @@ namespace FileCabinetApp
             }
 
             return false;
+        }
+
+        private static void Import(string parameters)
+        {
+            var parametersArray = parameters.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            if (parametersArray.Length < 2)
+            {
+                throw new ArgumentException("'export' must have more than 2 parameters", nameof(parameters));
+            }
+
+            string command = parametersArray[0].ToLower(CultureInfo.CurrentCulture);
+            string filePath = parametersArray[1];
+
+            if (command.ToLower(CultureInfo.CurrentCulture) == "csv")
+            {
+
+                var stream = new StreamReader(filePath);
+                var snapshot = new FileCabinetServiceSnapshot();
+                snapshot.LoadFromCsvFile(stream);
+                var fileMemoryService = new FileCabinetMemoryService(new DefaultValidator());
+                var records = fileMemoryService.Restore(snapshot);
+
+                foreach (var record in records)
+                {
+                    Console.WriteLine($"#{record.Id}, {record.FirstName}, {record.LastName}, {record.DateOfBirth:yyyy-MMM-dd}, {record.Height}, {record.Salary}, {record.Type}");
+                }
+
+            }
+
+            if (command.ToLower(CultureInfo.CurrentCulture) == "xml")
+            {
+                try
+                {
+                    XmlWriterSettings settings = new();
+                    settings.Indent = true;
+                    settings.NewLineOnAttributes = true;
+                    using (XmlWriter xw = XmlWriter.Create(filePath, settings))
+                    {
+                        var fileCabinetService1 = (FileCabinetMemoryService)fileCabinetService;
+                        var snapshot = fileCabinetService1.MakeSnapshot();
+                        snapshot.SaveToXml(xw);
+                        Console.WriteLine($"All records are exported to file {filePath}.");
+                    }
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    Console.WriteLine($"Export failed: can't open file {filePath}.");
+                }
+            }
         }
     }
 }

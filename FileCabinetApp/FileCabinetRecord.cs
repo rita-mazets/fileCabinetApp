@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace FileCabinetApp
 {
@@ -13,11 +14,19 @@ namespace FileCabinetApp
     public class FileCabinetRecord
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="FileCabinetRecord"/> class.
+        /// </summary>
+        public FileCabinetRecord()
+        {
+        }
+
+        /// <summary>
         /// Gets or sets describes the id.
         /// </summary>
         /// <value>
         /// Describes the id.
         /// </value>
+        [XmlAttribute]
         public int Id { get; set; }
 
         /// <summary>

@@ -43,7 +43,7 @@ namespace FileCabinetApp
 
         private static string ToCsvString(FileCabinetRecord record)
         {
-            return record.FirstName + "," + record.LastName + record.DateOfBirth + "," + record.Height + "," + record.Salary + "," + record.Type;
+            return record.Id + "," + record.FirstName + "," + record.LastName + "," + record.DateOfBirth + "," + record.Height + "," + record.Salary + "," + record.Type;
         }
     }
 }
