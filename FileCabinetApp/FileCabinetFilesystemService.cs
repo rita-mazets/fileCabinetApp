@@ -43,7 +43,11 @@ namespace FileCabinetApp
             }
 
             this.recordValidator.ValidateParameters(fileCabinetRecord);
-            fileCabinetRecord.Id = this.GetStat() + 1;
+            if (fileCabinetRecord.Id == 0)
+            {
+                fileCabinetRecord.Id = this.GetStat() + 1;
+            }
+
             var recordToBytes = RecordToBytes(fileCabinetRecord);
             this.fileStream.Write(recordToBytes, 0, recordToBytes.Length);
 

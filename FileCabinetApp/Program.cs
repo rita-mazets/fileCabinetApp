@@ -525,41 +525,38 @@ namespace FileCabinetApp
 
             string command = parametersArray[0].ToLower(CultureInfo.CurrentCulture);
             string filePath = parametersArray[1];
+            ReadOnlyCollection<FileCabinetRecord> records;
 
             if (command.ToLower(CultureInfo.CurrentCulture) == "csv")
             {
-
-                var stream = new StreamReader(filePath);
                 var snapshot = new FileCabinetServiceSnapshot();
-                snapshot.LoadFromCsvFile(stream);
-                var fileMemoryService = new FileCabinetMemoryService(new DefaultValidator());
-                var records = fileMemoryService.Restore(snapshot);
+                using (var stream = new StreamReader(filePath))
+                {
+                    snapshot.LoadFromCsvFile(stream);
+                    records = fileCabinetService.Restore(snapshot);
+                }
 
+                Console.WriteLine("This records was writing in file:");
                 foreach (var record in records)
                 {
                     Console.WriteLine($"#{record.Id}, {record.FirstName}, {record.LastName}, {record.DateOfBirth:yyyy-MMM-dd}, {record.Height}, {record.Salary}, {record.Type}");
                 }
-
             }
 
             if (command.ToLower(CultureInfo.CurrentCulture) == "xml")
             {
-                try
+                var snapshot = new FileCabinetServiceSnapshot();
+                using (var stream = new FileStream(filePath, FileMode.Open))
                 {
-                    XmlWriterSettings settings = new();
-                    settings.Indent = true;
-                    settings.NewLineOnAttributes = true;
-                    using (XmlWriter xw = XmlWriter.Create(filePath, settings))
+                    snapshot.LoadFromXmlFile(stream);
+                    records = fileCabinetService.Restore(snapshot);
+
+
+                    Console.WriteLine("This records was writing in file:");
+                    foreach (var record in records)
                     {
-                        var fileCabinetService1 = (FileCabinetMemoryService)fileCabinetService;
-                        var snapshot = fileCabinetService1.MakeSnapshot();
-                        snapshot.SaveToXml(xw);
-                        Console.WriteLine($"All records are exported to file {filePath}.");
+                        Console.WriteLine($"#{record.Id}, {record.FirstName}, {record.LastName}, {record.DateOfBirth:yyyy-MMM-dd}, {record.Height}, {record.Salary}, {record.Type}");
                     }
-                }
-                catch (DirectoryNotFoundException)
-                {
-                    Console.WriteLine($"Export failed: can't open file {filePath}.");
                 }
             }
         }

@@ -4,21 +4,20 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace FileCabinetApp
 {
-    /// <summary>
-    /// Reades list ti csv file class.
-    /// </summary>
-    public class FileCabinetRecordCsvReader
+    public class FileCabinetRecordXmlReader
     {
-        private StreamReader reader;
+        private FileStream reader;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FileCabinetRecordCsvReader"/> class.
+        /// Initializes a new instance of the <see cref="FileCabinetRecordXmlReader"/> class.
         /// </summary>
         /// <param name="reader">Parameter to initialize reader.</param>
-        public FileCabinetRecordCsvReader(StreamReader reader)
+        public FileCabinetRecordXmlReader(FileStream reader)
         {
             this.reader = reader;
         }
@@ -28,23 +27,12 @@ namespace FileCabinetApp
         /// </summary>
         public IList<FileCabinetRecord> ReadAll()
         {
-            List<FileCabinetRecord> records = new ();
+            this.reader.Seek(0, SeekOrigin.Begin);
+            XmlSerializer formatter = new XmlSerializer(typeof(Records));
+            Records records = (Records)formatter.Deserialize(this.reader);
+            return records.RecordList;
 
-            string line;
-            this.reader.ReadLine();
-            while ((line = this.reader.ReadLine()) != null)
-            {
-                try
-                {
-                    records.Add(PareString(line));
-                }
-                catch (ArgumentException)
-                {
-                    continue;
-                }
-            }
 
-            return records;
         }
 
         private static FileCabinetRecord PareString(string line)

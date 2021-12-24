@@ -60,5 +60,11 @@ namespace FileCabinetApp
             var reader = new FileCabinetRecordCsvReader(stramReader);
             this.list = (List<FileCabinetRecord>)reader.ReadAll();
         }
+
+        public void LoadFromXmlFile(FileStream srteam)
+        {
+            var reader = new FileCabinetRecordXmlReader(srteam);
+            this.list = (List<FileCabinetRecord>)reader.ReadAll();
+        }
     }
 }
