@@ -57,5 +57,7 @@ namespace FileCabinetApp
         /// <param name="dateOfBirth">Param to search.</param>
         /// <returns>Array where DateOfBirth is equal dateOfBirth.</returns>
         public ReadOnlyCollection<FileCabinetRecord> FindDateOfBirth(DateTime dateOfBirth);
+
+        public ReadOnlyCollection<FileCabinetRecord> Restore(FileCabinetServiceSnapshot snapshot);
     }
 }

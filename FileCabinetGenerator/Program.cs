@@ -12,7 +12,10 @@ namespace FileCabinetGenerator
 {
     class Program
     {
-        private static string outputType, output, recordAmount, startId;
+        private static string outputType;
+        private static string output;
+        private static string recordAmount;
+        private static string startId;
         private static Records records = new Records();
 
         static void Main(string[] args)
@@ -189,7 +192,7 @@ namespace FileCabinetGenerator
 
         private static string ToCsvString(FileCabinetRecord record)
         {
-            return record.Id + "," + record.FirstName + "," + record.LastName + record.DateOfBirth + "," + record.Height + "," + record.Salary + "," + record.Type;
+            return record.Id + "," + record.FirstName + "," + record.LastName + "," + record.DateOfBirth + "," + record.Height + "," + record.Salary + "," + record.Type;
         }
 
         private static void ExportXml()
@@ -199,11 +202,7 @@ namespace FileCabinetGenerator
                 XmlSerializer formatter = new XmlSerializer(typeof(Records));
                 using (StreamWriter fs = new StreamWriter(output))
                 {
-                    //foreach (var record in records.RecordList)
-                    
-                        formatter.Serialize(fs, records);
-                    
-
+                    formatter.Serialize(fs, records);
                     Console.WriteLine($"{recordAmount} records are exported to file {output}.");
                 }
             }
@@ -221,6 +220,4 @@ namespace FileCabinetGenerator
         public List<FileCabinetRecord> RecordList = new ();
 
     }
-
-    
 }
