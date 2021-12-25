@@ -86,9 +86,9 @@ namespace FileCabinetApp
         /// Gets the number of records.
         /// </summary>
         /// <returns>Record count.</returns>
-        public int GetStat()
+        public (int, int) GetStat()
         {
-            return this.list.Count;
+            return (this.list.Count, 0);
         }
 
         /// <summary>
@@ -304,9 +304,9 @@ namespace FileCabinetApp
             }
         }
 
-        public void Purge()
+        public int Purge()
         {
-            return;
+            return -1;
         }
     }
 }

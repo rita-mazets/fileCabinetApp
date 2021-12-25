@@ -46,14 +46,24 @@ namespace FileCabinetApp
 
             this.recordValidator.ValidateParameters(fileCabinetRecord);
 
-            if (this.FindId(fileCabinetRecord.Id).Count > 0)
-            {
-                throw new ArgumentException("Record with this id was create");
-            }
+            bool isPlus = false;
 
             if (fileCabinetRecord.Id == 0)
             {
-                fileCabinetRecord.Id = this.GetStat() + 1;
+                fileCabinetRecord.Id = this.GetStat().Item1 + 1;
+                isPlus = true;
+            }
+
+            if (isPlus)
+            {
+                while (this.FindId(fileCabinetRecord.Id).Count > 0)
+                {
+                    fileCabinetRecord.Id++;
+                }
+            }
+            else if (this.FindId(fileCabinetRecord.Id).Count > 0 && !isPlus)
+            {
+                throw new ArgumentException("Record with this id was create");
             }
 
             var recordToBytes = RecordToBytes(fileCabinetRecord);
@@ -194,6 +204,14 @@ namespace FileCabinetApp
             return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
         }
 
+        public ReadOnlyCollection<FileRecord> FindByIsDeleted()
+        {
+            var list = this.ReturnRecordList();
+            var result = list.Where(item => item.IsDeleted == 1).ToList();
+
+            return new ReadOnlyCollection<FileRecord>(result);
+        }
+
         /// <summary>
         /// Searches in the dictionary for data by lastName and return array where LastName is equal lastName .
         /// </summary>
@@ -238,21 +256,12 @@ namespace FileCabinetApp
             return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
         }
 
-        private ReadOnlyCollection<FileCabinetRecord> FindId(int id)
+        private List<FileRecord> FindId(int id)
         {
             var list = this.ReturnRecordList();
             var result = list.Where(item => item.Id == id && item.IsDeleted != 1).ToList();
-            List<FileCabinetRecord> cabinetList = new();
 
-            foreach (var item in list)
-            {
-                if (item.IsDeleted != 1)
-                {
-                    cabinetList.Add((FileCabinetRecord)item);
-                }
-            }
-
-            return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
+            return result;
         }
 
         /// <summary>
@@ -295,9 +304,9 @@ namespace FileCabinetApp
         /// Gets the number of records.
         /// </summary>
         /// <returns>Record count.</returns>
-        public int GetStat()
+        public (int, int) GetStat()
         {
-            return (int)(this.fileStream.Length / recordSize);
+            return ((int)(this.fileStream.Length / recordSize), this.FindByIsDeleted().Count);
         }
 
         /// <summary>
@@ -342,9 +351,9 @@ namespace FileCabinetApp
             this.EditRecord(record);
         }
 
-        public void Purge()
+        public int Purge()
         {
-            this.WriteInNewFile();
+            var count = this.WriteInNewFile();
             this.fileStream.Close();
             string pathDB = "cabinet-records.db";
             var fileDB = new FileInfo(pathDB);
@@ -352,12 +361,13 @@ namespace FileCabinetApp
             fileDB.Delete();
             fileNew.MoveTo(pathDB);
             this.fileStream = new FileStream(pathDB, FileMode.OpenOrCreate);
-            
 
+            return count;
         }
 
-        private void WriteInNewFile()
+        private int WriteInNewFile()
         {
+            int count = 0;
             this.fileStream.Seek(0, SeekOrigin.Begin);
             var recordBuffer = new byte[recordSize];
 
@@ -368,12 +378,15 @@ namespace FileCabinetApp
                     var record = BytesToFileCabinetRecord(recordBuffer);
                     if (record.IsDeleted == 0)
                     {
+                        count++;
                         byte[] recordToBytes;
                         recordToBytes = RecordToBytes(record);
                         streamWriter.Write(recordToBytes, 0, recordToBytes.Length);
                     }
                 }
             }
+
+            return count;
         }
     }
 }

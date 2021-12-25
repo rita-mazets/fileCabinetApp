@@ -29,7 +29,7 @@ namespace FileCabinetApp
         /// Gets the number of records.
         /// </summary>
         /// <returns>Record count.</returns>
-        public int GetStat();
+        public (int, int) GetStat();
 
         /// <summary>
         /// Edits an existing record.
@@ -62,6 +62,6 @@ namespace FileCabinetApp
 
         public void Remove(int id);
 
-        public void Purge();
+        public int Purge();
     }
 }
