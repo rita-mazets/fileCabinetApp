@@ -303,5 +303,10 @@ namespace FileCabinetApp
                 dictionary.Remove(param);
             }
         }
+
+        public void Purge()
+        {
+            return;
+        }
     }
 }

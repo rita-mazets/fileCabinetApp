@@ -61,5 +61,7 @@ namespace FileCabinetApp
         public ReadOnlyCollection<FileCabinetRecord> Restore(FileCabinetServiceSnapshot snapshot);
 
         public void Remove(int id);
+
+        public void Purge();
     }
 }

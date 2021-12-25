@@ -35,6 +35,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("export", Export),
             new Tuple<string, Action<string>>("import", Import),
             new Tuple<string, Action<string>>("remove", Remove),
+            new Tuple<string, Action<string>>("purge", Purge),
         };
 
         private static string[][] helpMessages = new string[][]
@@ -49,6 +50,7 @@ namespace FileCabinetApp
             new string[] { "export", "exports to csv or xml ", "The 'export' command exports to csv or xml " },
             new string[] { "import", "import from csv or xml ", "The 'import' command import from csv or xml " },
             new string[] { "remove", "remove from file ", "The 'remove' command delete record " },
+            new string[] { "purge", "purge date ", "The 'purge' command purge data " },
         };
 
         /// <summary>
@@ -590,6 +592,11 @@ namespace FileCabinetApp
             }
 
             Console.WriteLine();
+        }
+
+        private static void Purge(string parameters)
+        {
+            fileCabinetService.Purge();
         }
     }
 }

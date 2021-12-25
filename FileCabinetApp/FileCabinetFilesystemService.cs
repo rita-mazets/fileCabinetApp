@@ -150,22 +150,18 @@ namespace FileCabinetApp
                     if (fileCabinetRecord is FileRecord)
                     {
                         recordToBytes = RecordToBytes(record, 1);
-                        
                         removeRecords.Add(record.Id);
                     }
                     else
                     {
                         recordToBytes = RecordToBytes(fileCabinetRecord);
                     }
-                    
                     /*record.FirstName = fileCabinetRecord.FirstName;
                     record.LastName = fileCabinetRecord.LastName;
                     record.DateOfBirth = fileCabinetRecord.DateOfBirth;
                     record.Height = fileCabinetRecord.Height;
                     record.Salary = fileCabinetRecord.Salary;
                     record.Type = fileCabinetRecord.Type;*/
-
-                    
                     this.fileStream.Seek(offset * recordSize, SeekOrigin.Begin);
                     this.fileStream.Write(recordToBytes, 0, recordToBytes.Length);
                     break;
@@ -344,6 +340,40 @@ namespace FileCabinetApp
         {
             var record = new FileRecord { Id = id, IsDeleted = 1 };
             this.EditRecord(record);
+        }
+
+        public void Purge()
+        {
+            this.WriteInNewFile();
+            this.fileStream.Close();
+            string pathDB = "cabinet-records.db";
+            var fileDB = new FileInfo(pathDB);
+            var fileNew = new FileInfo("newFile");
+            fileDB.Delete();
+            fileNew.MoveTo(pathDB);
+            this.fileStream = new FileStream(pathDB, FileMode.OpenOrCreate);
+            
+
+        }
+
+        private void WriteInNewFile()
+        {
+            this.fileStream.Seek(0, SeekOrigin.Begin);
+            var recordBuffer = new byte[recordSize];
+
+            using (var streamWriter = new FileStream("newFile", FileMode.OpenOrCreate))
+            {
+                while (this.fileStream.Read(recordBuffer, 0, recordBuffer.Length) > 0)
+                {
+                    var record = BytesToFileCabinetRecord(recordBuffer);
+                    if (record.IsDeleted == 0)
+                    {
+                        byte[] recordToBytes;
+                        recordToBytes = RecordToBytes(record);
+                        streamWriter.Write(recordToBytes, 0, recordToBytes.Length);
+                    }
+                }
+            }
         }
     }
 }
