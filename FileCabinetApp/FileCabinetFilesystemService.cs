@@ -259,5 +259,10 @@ namespace FileCabinetApp
 
             return snapshot.Records;
         }
+
+        public void Remove(int id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

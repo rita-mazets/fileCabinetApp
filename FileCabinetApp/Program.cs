@@ -34,6 +34,7 @@ namespace FileCabinetApp
             new Tuple<string, Action<string>>("find", Find),
             new Tuple<string, Action<string>>("export", Export),
             new Tuple<string, Action<string>>("import", Import),
+            new Tuple<string, Action<string>>("remove", Remove),
         };
 
         private static string[][] helpMessages = new string[][]
@@ -47,6 +48,7 @@ namespace FileCabinetApp
             new string[] { "find", "allows to find record ", "The 'find' command allows to find record. " },
             new string[] { "export", "exports to csv or xml ", "The 'export' command exports to csv or xml " },
             new string[] { "import", "import from csv or xml ", "The 'import' command import from csv or xml " },
+            new string[] { "remove", "remove from file ", "The 'remove' command delete record " },
         };
 
         /// <summary>
@@ -559,6 +561,29 @@ namespace FileCabinetApp
                     }
                 }
             }
+        }
+
+        private static void Remove(string parameters)
+        {
+            Console.WriteLine();
+            int id;
+
+            if (!int.TryParse(parameters, out id))
+            {
+                Console.WriteLine("Incorrect id parameter");
+                return;
+            }
+
+            try
+            {
+                fileCabinetService.Remove(id);
+            }
+            catch (ArgumentException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            Console.WriteLine();
         }
     }
 }

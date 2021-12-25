@@ -46,7 +46,8 @@ namespace FileCabinetApp
 
             var listItem = new FileCabinetRecord
             {
-                Id = this.list.Count + 1,
+
+                Id = fileCabinetRecord.Id == 0 ? this.list.Count + 1 : fileCabinetRecord.Id,
                 FirstName = fileCabinetRecord.FirstName, LastName = fileCabinetRecord.LastName, DateOfBirth = fileCabinetRecord.DateOfBirth, Height = fileCabinetRecord.Height, Salary = fileCabinetRecord.Salary, Type = fileCabinetRecord.Type,
             };
 
@@ -274,6 +275,33 @@ namespace FileCabinetApp
             }
 
             return snapshot.Records;
+        }
+
+        public void Remove(int id)
+        {
+            if (!this.list.Where(item => item.Id == id).Any())
+            {
+                throw new ArgumentException($"Record {id} doesn't exist.", nameof(id));
+            }
+
+            var record = this.list.Where(item => item.Id == id).First();
+
+            this.list.Remove(record);
+            RemoveDictionary<string>(this.firstNameDictionary, record, record.FirstName);
+            RemoveDictionary<string>(this.lastNameDictionary, record, record.LastName);
+            RemoveDictionary<DateTime>(this.dateOfBirthDictionary, record, record.DateOfBirth);
+        }
+
+        private static void RemoveDictionary<T>(Dictionary<T, List<FileCabinetRecord>> dictionary, FileCabinetRecord record, T param)
+        {
+            if (dictionary[param].Count > 1)
+            {
+                dictionary[param].Remove(record);
+            }
+            else if (dictionary[param].Count == 1)
+            {
+                dictionary.Remove(param);
+            }
         }
     }
 }
