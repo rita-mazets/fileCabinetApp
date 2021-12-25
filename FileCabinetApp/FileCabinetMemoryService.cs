@@ -281,7 +281,7 @@ namespace FileCabinetApp
         {
             if (!this.list.Where(item => item.Id == id).Any())
             {
-                throw new ArgumentException($"Record {id} doesn't exist.", nameof(id));
+                throw new ArgumentException($"Record {id} doesn't exist.");
             }
 
             var record = this.list.Where(item => item.Id == id).First();

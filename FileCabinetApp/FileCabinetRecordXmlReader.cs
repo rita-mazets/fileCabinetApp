@@ -30,7 +30,7 @@ namespace FileCabinetApp
             this.reader.Seek(0, SeekOrigin.Begin);
             XmlSerializer formatter = new XmlSerializer(typeof(Records));
             Records records = (Records)formatter.Deserialize(this.reader);
-            return records.RecordList;
+            return (IList<FileCabinetRecord>)records.RecordList;
 
 
         }

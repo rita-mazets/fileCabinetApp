@@ -11,7 +11,12 @@ namespace FileCabinetApp
     public class Records
     {
         [XmlArray("record")]
-        public List<FileCabinetRecord> RecordList = new();
+        public List<FileRecord> RecordList = new();
 
+    }
+
+    public class FileRecord : FileCabinetRecord
+    {
+        public short IsDeleted { get; set; }
     }
 }

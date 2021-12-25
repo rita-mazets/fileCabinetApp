@@ -17,7 +17,7 @@ namespace FileCabinetApp
         private FileStream fileStream;
         private IRecordValidator recordValidator;
         private static int maxNameLength = 60;
-        private static int recordSize = sizeof(int) + (2 * maxNameLength) + (3 * sizeof(int)) + sizeof(short) + sizeof(decimal) + sizeof(char);
+        private static int recordSize = sizeof(short) + sizeof(int) + (2 * maxNameLength) + (3 * sizeof(int)) + sizeof(short) + sizeof(decimal) + sizeof(char);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileCabinetFilesystemService"/> class.
@@ -54,7 +54,7 @@ namespace FileCabinetApp
             return fileCabinetRecord.Id;
         }
 
-        private static byte[] RecordToBytes(FileCabinetRecord record)
+        private static byte[] RecordToBytes(FileCabinetRecord record, short isDeleted = 0)
         {
             if (record == null)
             {
@@ -65,6 +65,7 @@ namespace FileCabinetApp
             using (var memoryStream = new MemoryStream(bytes))
             using (var binaryWriter = new BinaryWriter(memoryStream))
             {
+                binaryWriter.Write(isDeleted);
                 binaryWriter.Write(record.Id);
 
                 var firstnameBytes = Encoding.UTF8.GetBytes(record.FirstName.PadRight(maxNameLength));
@@ -84,18 +85,19 @@ namespace FileCabinetApp
             return bytes;
         }
 
-        private static FileCabinetRecord BytesToFileCabinetRecord(byte[] bytes)
+        private static FileRecord BytesToFileCabinetRecord(byte[] bytes)
         {
             if (bytes == null)
             {
                 throw new ArgumentNullException(nameof(bytes));
             }
 
-            var record = new FileCabinetRecord();
+            var record = new FileRecord();
 
             using (var memoryStream = new MemoryStream(bytes))
             using (var binaryReader = new BinaryReader(memoryStream))
             {
+                record.IsDeleted = binaryReader.ReadInt16();
                 record.Id = binaryReader.ReadInt32();
 
                 var firstnameBuffer = binaryReader.ReadBytes(maxNameLength);
@@ -160,9 +162,9 @@ namespace FileCabinetApp
         /// <returns>Array where FirstName is equal firstName.</returns>
         public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
         {
-            List<FileCabinetRecord> list = this.ReturnRecordList();
-            List<FileCabinetRecord> result = list.Where(item => item.FirstName == firstName).ToList();
-            return new ReadOnlyCollection<FileCabinetRecord>(result);
+            var list = this.ReturnRecordList();
+            var result = list.Where(item => item.FirstName == firstName).ToList();
+            return new ReadOnlyCollection<FileCabinetRecord>((IList<FileCabinetRecord>)result);
         }
 
         /// <summary>
@@ -172,9 +174,9 @@ namespace FileCabinetApp
         /// <returns>Array where LastName is equal lastName.</returns>
         public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName)
         {
-            List<FileCabinetRecord> list = this.ReturnRecordList();
-            List<FileCabinetRecord> result = list.Where(item => item.LastName == lastName).ToList();
-            return new ReadOnlyCollection<FileCabinetRecord>(result);
+            var list = this.ReturnRecordList();
+            var result = list.Where(item => item.LastName == lastName).ToList();
+            return new ReadOnlyCollection<FileCabinetRecord>((IList<FileCabinetRecord>)result);
         }
 
         /// <summary>
@@ -184,9 +186,9 @@ namespace FileCabinetApp
         /// <returns>Array where DateOfBirth is equal dateOfBirth.</returns>
         public ReadOnlyCollection<FileCabinetRecord> FindDateOfBirth(DateTime dateOfBirth)
         {
-            List<FileCabinetRecord> list = this.ReturnRecordList();
-            List<FileCabinetRecord> result = list.Where(item => item.DateOfBirth == dateOfBirth).ToList();
-            return new ReadOnlyCollection<FileCabinetRecord>(result);
+            var list = this.ReturnRecordList();
+            var result = list.Where(item => item.DateOfBirth == dateOfBirth).ToList();
+            return new ReadOnlyCollection<FileCabinetRecord>((IList<FileCabinetRecord>)result);
         }
 
         /// <summary>
@@ -195,15 +197,22 @@ namespace FileCabinetApp
         /// <returns>All records.</returns>
         public ReadOnlyCollection<FileCabinetRecord> GetRecords()
         {
-            List<FileCabinetRecord> list = this.ReturnRecordList();
+            var list = this.ReturnRecordList();
 
-            return new ReadOnlyCollection<FileCabinetRecord>(list);
+            List<FileCabinetRecord> cabinetList = new ();
+
+            foreach (var item in list)
+            {
+                cabinetList.Add((FileCabinetRecord)item);
+            }
+
+            return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
         }
 
-        private List<FileCabinetRecord> ReturnRecordList()
+        private List<FileRecord> ReturnRecordList()
         {
             this.fileStream.Seek(0, SeekOrigin.Begin);
-            List<FileCabinetRecord> list = new ();
+            List<FileRecord> list = new ();
             var recordBuffer = new byte[recordSize];
 
             while (this.fileStream.Read(recordBuffer, 0, recordBuffer.Length) > 0)
