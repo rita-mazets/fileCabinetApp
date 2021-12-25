@@ -18,6 +18,7 @@ namespace FileCabinetApp
         private IRecordValidator recordValidator;
         private static int maxNameLength = 60;
         private static int recordSize = sizeof(short) + sizeof(int) + (2 * maxNameLength) + (3 * sizeof(int)) + sizeof(short) + sizeof(decimal) + sizeof(char);
+        private static RemoveRecords removeRecords;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileCabinetFilesystemService"/> class.
@@ -28,6 +29,7 @@ namespace FileCabinetApp
         {
             this.fileStream = fileStream;
             this.recordValidator = recordValidator;
+            removeRecords = new ();
         }
 
         /// <summary>
@@ -43,6 +45,12 @@ namespace FileCabinetApp
             }
 
             this.recordValidator.ValidateParameters(fileCabinetRecord);
+
+            if (this.FindId(fileCabinetRecord.Id).Count > 0)
+            {
+                throw new ArgumentException("Record with this id was create");
+            }
+
             if (fileCabinetRecord.Id == 0)
             {
                 fileCabinetRecord.Id = this.GetStat() + 1;
@@ -138,14 +146,26 @@ namespace FileCabinetApp
                 var record = BytesToFileCabinetRecord(recordBuffer);
                 if (record.Id == fileCabinetRecord.Id)
                 {
-                    record.FirstName = fileCabinetRecord.FirstName;
+                    byte[] recordToBytes;
+                    if (fileCabinetRecord is FileRecord)
+                    {
+                        recordToBytes = RecordToBytes(record, 1);
+                        
+                        removeRecords.Add(record.Id);
+                    }
+                    else
+                    {
+                        recordToBytes = RecordToBytes(fileCabinetRecord);
+                    }
+                    
+                    /*record.FirstName = fileCabinetRecord.FirstName;
                     record.LastName = fileCabinetRecord.LastName;
                     record.DateOfBirth = fileCabinetRecord.DateOfBirth;
                     record.Height = fileCabinetRecord.Height;
                     record.Salary = fileCabinetRecord.Salary;
-                    record.Type = fileCabinetRecord.Type;
+                    record.Type = fileCabinetRecord.Type;*/
 
-                    var recordToBytes = RecordToBytes(fileCabinetRecord);
+                    
                     this.fileStream.Seek(offset * recordSize, SeekOrigin.Begin);
                     this.fileStream.Write(recordToBytes, 0, recordToBytes.Length);
                     break;
@@ -163,8 +183,19 @@ namespace FileCabinetApp
         public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
         {
             var list = this.ReturnRecordList();
-            var result = list.Where(item => item.FirstName == firstName).ToList();
-            return new ReadOnlyCollection<FileCabinetRecord>((IList<FileCabinetRecord>)result);
+            var result = list.Where(item => item.FirstName == firstName && item.IsDeleted != 1).ToList();
+
+            List<FileCabinetRecord> cabinetList = new();
+
+            foreach (var item in list)
+            {
+                if (item.IsDeleted != 1)
+                {
+                    cabinetList.Add((FileCabinetRecord)item);
+                }
+            }
+
+            return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
         }
 
         /// <summary>
@@ -175,8 +206,18 @@ namespace FileCabinetApp
         public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName)
         {
             var list = this.ReturnRecordList();
-            var result = list.Where(item => item.LastName == lastName).ToList();
-            return new ReadOnlyCollection<FileCabinetRecord>((IList<FileCabinetRecord>)result);
+            var result = list.Where(item => item.LastName == lastName && item.IsDeleted != 1).ToList();
+            List<FileCabinetRecord> cabinetList = new();
+
+            foreach (var item in list)
+            {
+                if (item.IsDeleted != 1)
+                {
+                    cabinetList.Add((FileCabinetRecord)item);
+                }
+            }
+
+            return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
         }
 
         /// <summary>
@@ -187,8 +228,35 @@ namespace FileCabinetApp
         public ReadOnlyCollection<FileCabinetRecord> FindDateOfBirth(DateTime dateOfBirth)
         {
             var list = this.ReturnRecordList();
-            var result = list.Where(item => item.DateOfBirth == dateOfBirth).ToList();
-            return new ReadOnlyCollection<FileCabinetRecord>((IList<FileCabinetRecord>)result);
+            var result = list.Where(item => item.DateOfBirth == dateOfBirth && item.IsDeleted != 1).ToList();
+            List<FileCabinetRecord> cabinetList = new();
+
+            foreach (var item in list)
+            {
+                if (item.IsDeleted != 1)
+                {
+                    cabinetList.Add((FileCabinetRecord)item);
+                }
+            }
+
+            return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
+        }
+
+        private ReadOnlyCollection<FileCabinetRecord> FindId(int id)
+        {
+            var list = this.ReturnRecordList();
+            var result = list.Where(item => item.Id == id && item.IsDeleted != 1).ToList();
+            List<FileCabinetRecord> cabinetList = new();
+
+            foreach (var item in list)
+            {
+                if (item.IsDeleted != 1)
+                {
+                    cabinetList.Add((FileCabinetRecord)item);
+                }
+            }
+
+            return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
         }
 
         /// <summary>
@@ -203,7 +271,10 @@ namespace FileCabinetApp
 
             foreach (var item in list)
             {
-                cabinetList.Add((FileCabinetRecord)item);
+                if (item.IsDeleted != 1)
+                {
+                    cabinetList.Add((FileCabinetRecord)item);
+                }
             }
 
             return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
@@ -271,7 +342,8 @@ namespace FileCabinetApp
 
         public void Remove(int id)
         {
-            throw new NotImplementedException();
+            var record = new FileRecord { Id = id, IsDeleted = 1 };
+            this.EditRecord(record);
         }
     }
 }

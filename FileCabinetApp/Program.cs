@@ -66,6 +66,11 @@ namespace FileCabinetApp
             Console.WriteLine(Program.HintMessage);
             Console.WriteLine();
 
+            RemoveRecords r = new RemoveRecords();
+            r.Add(1);
+            r.Add(2);
+
+
             do
             {
                 Console.Write("> ");
@@ -250,9 +255,10 @@ namespace FileCabinetApp
                 var result = Program.fileCabinetService.CreateRecord(fileCabinetRecord);
                 Console.WriteLine($"Record #{result} is created.\n");
             }
-            catch (ArgumentException)
+            catch (ArgumentException e)
             {
-                Console.WriteLine("Incorrect data! Please, input data again!");
+
+                Console.WriteLine(e.Message);
                 Program.Create(parameters);
             }
 
