@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.CommandHandlers.ServiceCommandHandlers;
 
 namespace FileCabinetApp.CommandHandlers
 {
-    public class ListCommandHandler : CommandHandlerBase
+    public class ListCommandHandler : ServiceCommandHandlerBase
     {
+        public ListCommandHandler(IFileCabinetService fileCabinetService)
+            : base(fileCabinetService)
+        {
+        }
+
         public override object Handle(AppComandRequest appComandRequest)
         {
             if (appComandRequest is null)
@@ -17,7 +20,7 @@ namespace FileCabinetApp.CommandHandlers
 
             if (appComandRequest.Command.Equals("list"))
             {
-                var records = Program.fileCabinetService.GetRecords();
+                var records = this.fileCabinetService.GetRecords();
                 var result = string.Empty;
 
                 foreach (var record in records)

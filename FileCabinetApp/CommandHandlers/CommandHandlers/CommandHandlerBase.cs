@@ -10,7 +10,7 @@ namespace FileCabinetApp.CommandHandlers
     {
         private ICommandHandler nextHandler;
 
-        public virtual object Handle(AppComandRequest appComandRequest) 
+        public virtual object Handle(AppComandRequest appComandRequest)
         {
             if (this.nextHandler is null)
             {

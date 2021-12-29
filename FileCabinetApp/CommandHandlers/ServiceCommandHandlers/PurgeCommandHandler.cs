@@ -1,13 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.CommandHandlers.ServiceCommandHandlers;
 
 namespace FileCabinetApp.CommandHandlers
 {
-    public class PurgeCommandHandler : CommandHandlerBase
+    public class PurgeCommandHandler : ServiceCommandHandlerBase
     {
+        public PurgeCommandHandler(IFileCabinetService fileCabinetService)
+            : base(fileCabinetService)
+        {
+        }
+
         public override object Handle(AppComandRequest appComandRequest)
         {
             if (appComandRequest is null)
@@ -17,7 +19,7 @@ namespace FileCabinetApp.CommandHandlers
 
             if (appComandRequest.Command.Equals("purge"))
             {
-                var count = Program.fileCabinetService.Purge();
+                var count = this.fileCabinetService.Purge();
                 return $"Data file processing is completed: {count} were purged.";
             }
             else

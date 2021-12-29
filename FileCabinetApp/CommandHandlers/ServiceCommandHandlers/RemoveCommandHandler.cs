@@ -1,13 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.CommandHandlers.ServiceCommandHandlers;
 
 namespace FileCabinetApp.CommandHandlers
 {
-    public class RemoveCommandHandler : CommandHandlerBase
+    public class RemoveCommandHandler : ServiceCommandHandlerBase
     {
+
+        public RemoveCommandHandler(IFileCabinetService fileCabinetService)
+            : base(fileCabinetService)
+        {
+        }
+
         public override object Handle(AppComandRequest appComandRequest)
         {
             if (appComandRequest is null)
@@ -26,7 +29,7 @@ namespace FileCabinetApp.CommandHandlers
 
                 try
                 {
-                    Program.fileCabinetService.Remove(id);
+                    this.fileCabinetService.Remove(id);
                     return $"Record {id} was deleted";
                 }
                 catch (ArgumentException e)

@@ -1,13 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.CommandHandlers.ServiceCommandHandlers;
 
 namespace FileCabinetApp.CommandHandlers
 {
-    public class EditCommandHandler: CommandHandlerBase
+    public class EditCommandHandler: ServiceCommandHandlerBase
     {
+        public EditCommandHandler(IFileCabinetService fileCabinetService)
+            : base(fileCabinetService)
+        {
+        }
+
         public override object Handle(AppComandRequest appComandRequest)
         {
             if (appComandRequest is null)
@@ -29,7 +31,7 @@ namespace FileCabinetApp.CommandHandlers
                     var fileCabinetRecord = InputDate.Input();
                     fileCabinetRecord.Id = id;
 
-                    Program.fileCabinetService.EditRecord(fileCabinetRecord);
+                    this.fileCabinetService.EditRecord(fileCabinetRecord);
                     return $"Record #{id} is updated.";
                 }
                 catch (ArgumentException)

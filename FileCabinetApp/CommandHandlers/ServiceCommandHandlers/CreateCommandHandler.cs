@@ -1,13 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.CommandHandlers.ServiceCommandHandlers;
 
 namespace FileCabinetApp.CommandHandlers
 {
-    public class CreateCommandHandler:CommandHandlerBase
+    public class CreateCommandHandler: ServiceCommandHandlerBase
     {
+        public CreateCommandHandler(IFileCabinetService fileCabinetService)
+            : base(fileCabinetService)
+        {
+        }
+
         public override object Handle(AppComandRequest appComandRequest)
         {
             if (appComandRequest is null)
@@ -20,7 +22,7 @@ namespace FileCabinetApp.CommandHandlers
                 try
                 {
                     var fileCabinetRecord = InputDate.Input();
-                    var result = Program.fileCabinetService.CreateRecord(fileCabinetRecord);
+                    var result = this.fileCabinetService.CreateRecord(fileCabinetRecord);
                     return $"Record #{result} is created.\n";
                 }
                 catch (ArgumentException e)

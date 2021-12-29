@@ -1,16 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
+using FileCabinetApp.CommandHandlers.ServiceCommandHandlers;
 
 namespace FileCabinetApp.CommandHandlers
 {
-    public class ExportCommandHandler : CommandHandlerBase
+    public class ExportCommandHandler : ServiceCommandHandlerBase
     {
+        public ExportCommandHandler(IFileCabinetService fileCabinetService)
+            : base(fileCabinetService)
+        {
+        }
+
         public override object Handle(AppComandRequest appComandRequest)
         {
             if (appComandRequest is null)
@@ -37,12 +39,12 @@ namespace FileCabinetApp.CommandHandlers
 
                 if (command.ToLower(CultureInfo.CurrentCulture) == "csv")
                 {
-                    return ExportCsv(filePath);
+                    return this.ExportCsv(filePath);
                 }
 
                 if (command.ToLower(CultureInfo.CurrentCulture) == "xml")
                 {
-                    return ExportXml(filePath);
+                    return this.ExportXml(filePath);
                 }
 
                 return "File wasn't writting";
@@ -53,7 +55,7 @@ namespace FileCabinetApp.CommandHandlers
             }
         }
 
-        private static string ExportCsv(string filePath)
+        private string ExportCsv(string filePath)
         {
             try
             {
@@ -61,7 +63,7 @@ namespace FileCabinetApp.CommandHandlers
                 {
                     sw.WriteLine("Id,FirstName,LastName,DateOfBirth,Height,Salary,Type");
 
-                    var fileCabinetService1 = (FileCabinetMemoryService)Program.fileCabinetService;
+                    var fileCabinetService1 = (FileCabinetMemoryService)this.fileCabinetService;
                     var snapshot = fileCabinetService1.MakeSnapshot();
                     snapshot.SaveToCsv(sw);
                     return $"All records are exported to file {filePath}.";
@@ -73,7 +75,7 @@ namespace FileCabinetApp.CommandHandlers
             }
         }
 
-        private static string ExportXml(string filePath)
+        private string ExportXml(string filePath)
         {
             try
             {
@@ -82,7 +84,7 @@ namespace FileCabinetApp.CommandHandlers
                 settings.NewLineOnAttributes = true;
                 using (XmlWriter xw = XmlWriter.Create(filePath, settings))
                 {
-                    var fileCabinetService1 = (FileCabinetMemoryService)Program.fileCabinetService;
+                    var fileCabinetService1 = (FileCabinetMemoryService)this.fileCabinetService;
                     var snapshot = fileCabinetService1.MakeSnapshot();
                     snapshot.SaveToXml(xw);
                     return $"All records are exported to file {filePath}.";

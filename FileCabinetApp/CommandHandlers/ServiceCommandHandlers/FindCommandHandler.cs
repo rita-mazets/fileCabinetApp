@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FileCabinetApp.CommandHandlers.ServiceCommandHandlers;
 
 namespace FileCabinetApp.CommandHandlers
 {
-    public class FindCommandHandler : CommandHandlerBase
+    public class FindCommandHandler : ServiceCommandHandlerBase
     {
+        public FindCommandHandler(IFileCabinetService fileCabinetService)
+            : base(fileCabinetService)
+        {
+        }
+
         public override object Handle(AppComandRequest appComandRequest)
         {
             if (appComandRequest is null)
@@ -34,7 +37,7 @@ namespace FileCabinetApp.CommandHandlers
                     {
                         string firstName = parametersArray[1];
                         firstName = firstName[1..^1];
-                        records = Program.fileCabinetService.FindByFirstName(firstName);
+                        records = this.fileCabinetService.FindByFirstName(firstName);
                     }
                     catch (ArgumentException)
                     {
@@ -48,7 +51,7 @@ namespace FileCabinetApp.CommandHandlers
                     {
                         string lastname = parametersArray[1];
                         lastname = lastname[1..^1];
-                        records = Program.fileCabinetService.FindByLastName(lastname);
+                        records = this.fileCabinetService.FindByLastName(lastname);
                     }
                     catch (ArgumentException)
                     {
@@ -68,7 +71,7 @@ namespace FileCabinetApp.CommandHandlers
                             return "Incorrect date";
                         }
 
-                        records = Program.fileCabinetService.FindDateOfBirth(date);
+                        records = this.fileCabinetService.FindDateOfBirth(date);
                     }
                     catch (ArgumentException)
                     {
