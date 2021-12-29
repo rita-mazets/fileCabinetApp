@@ -3,14 +3,18 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using FileCabinetApp.CommandHandlers.ServiceCommandHandlers;
+using FileCabinetApp.interfaces;
 
 namespace FileCabinetApp.CommandHandlers
 {
     public class ImportCommandHandler : ServiceCommandHandlerBase
     {
-        public ImportCommandHandler(IFileCabinetService fileCabinetService)
+        private IRecordPrinter printer;
+
+        public ImportCommandHandler(IFileCabinetService fileCabinetService, IRecordPrinter printer)
             : base(fileCabinetService)
         {
+            this.printer = printer;
         }
 
         public override object Handle(AppComandRequest appComandRequest)
@@ -79,12 +83,7 @@ namespace FileCabinetApp.CommandHandlers
                 records = this.fileCabinetService.Restore(snapshot);
             }
 
-            string result = "This records was writing in file:\n";
-            foreach (var record in records)
-            {
-                result += $"#{record.Id}, {record.FirstName}, {record.LastName}, {record.DateOfBirth:yyyy-MMM-dd}, {record.Height}, {record.Salary}, {record.Type}\n";
-            }
-
+            string result = "This records was writing in file:\n" + this.printer.Print(records);
             return result;
         }
     }

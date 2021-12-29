@@ -2,14 +2,18 @@
 using System.Collections.Generic;
 using System.Globalization;
 using FileCabinetApp.CommandHandlers.ServiceCommandHandlers;
+using FileCabinetApp.interfaces;
 
 namespace FileCabinetApp.CommandHandlers
 {
     public class FindCommandHandler : ServiceCommandHandlerBase
     {
-        public FindCommandHandler(IFileCabinetService fileCabinetService)
+        private IRecordPrinter printer;
+
+        public FindCommandHandler(IFileCabinetService fileCabinetService, IRecordPrinter printer)
             : base(fileCabinetService)
         {
+            this.printer = printer;
         }
 
         public override object Handle(AppComandRequest appComandRequest)
@@ -79,13 +83,7 @@ namespace FileCabinetApp.CommandHandlers
                     }
                 }
 
-                string result = string.Empty;
-                foreach (var record in records)
-                {
-                   result = result + $"#{record.Id}, {record.FirstName}, {record.LastName}, {record.DateOfBirth:yyyy-MMM-dd}, {record.Height}, {record.Salary}, {record.Type}\n";
-                }
-
-                return result;
+                return this.printer.Print(records);
             }
             else
             {

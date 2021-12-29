@@ -20,7 +20,7 @@ namespace FileCabinetApp
         //private const int DescriptionHelpIndex = 1;
         //private const int ExplanationHelpIndex = 2;
 
-        public static bool isRunning = true;
+        private static bool isRunning = true;
 
         private static IFileCabinetService fileCabinetService;
 
@@ -63,14 +63,15 @@ namespace FileCabinetApp
 
         private static ICommandHandler CreateCommandHandlers()
         {
+            var recordPrinter = new DefaultRecordPrinter();
             var helpHandler = new HelpCommandHandler();
             var createHandler = new CreateCommandHandler(Program.fileCabinetService);
             var editHandler = new EditCommandHandler(Program.fileCabinetService);
-            var exitHandler = new ExitCommandHandler();
+            var exitHandler = new ExitCommandHandler(Program.isRunning);
             var exportHandler = new ExportCommandHandler(Program.fileCabinetService);
-            var findHandler = new FindCommandHandler(Program.fileCabinetService);
-            var importHandler = new ImportCommandHandler(Program.fileCabinetService);
-            var listHandler = new ListCommandHandler(Program.fileCabinetService);
+            var findHandler = new FindCommandHandler(Program.fileCabinetService, recordPrinter);
+            var importHandler = new ImportCommandHandler(Program.fileCabinetService, recordPrinter);
+            var listHandler = new ListCommandHandler(Program.fileCabinetService, recordPrinter);
             var purgeHandler = new PurgeCommandHandler(Program.fileCabinetService);
             var removeHandler = new RemoveCommandHandler(Program.fileCabinetService);
             var statHandler = new StatCommandHandler(Program.fileCabinetService);
