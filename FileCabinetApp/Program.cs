@@ -67,9 +67,9 @@ namespace FileCabinetApp
             var helpHandler = new HelpCommandHandler();
             var createHandler = new CreateCommandHandler(Program.fileCabinetService);
             var editHandler = new EditCommandHandler(Program.fileCabinetService);
-            var exitHandler = new ExitCommandHandler(Program.isRunning);
+            var exitHandler = new ExitCommandHandler(Program.ChangeRunning);
             var exportHandler = new ExportCommandHandler(Program.fileCabinetService);
-            var findHandler = new FindCommandHandler(Program.fileCabinetService, recordPrinter);
+            var findHandler = new FindCommandHandler(Program.fileCabinetService, DefaultRecordPrint);
             var importHandler = new ImportCommandHandler(Program.fileCabinetService, recordPrinter);
             var listHandler = new ListCommandHandler(Program.fileCabinetService, recordPrinter);
             var purgeHandler = new PurgeCommandHandler(Program.fileCabinetService);
@@ -188,6 +188,24 @@ namespace FileCabinetApp
         {
             Console.WriteLine($"There is no '{command}' command.");
             Console.WriteLine();
+        }
+
+        private static void DefaultRecordPrint(IEnumerable<FileCabinetRecord> records)
+        {
+            if (records is null)
+            {
+                throw new ArgumentNullException(nameof(records));
+            }
+
+            foreach (var record in records)
+            {
+                Console.WriteLine($"#{record.Id}, {record.FirstName}, {record.LastName}, {record.DateOfBirth:yyyy-MMM-dd}, {record.Height}, {record.Salary}, {record.Type}\n");
+            }
+        }
+
+        private static void ChangeRunning(bool isRunning)
+        {
+            Program.isRunning = isRunning;
         }
     }
 }

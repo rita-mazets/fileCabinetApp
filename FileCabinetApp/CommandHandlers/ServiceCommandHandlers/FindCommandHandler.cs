@@ -8,9 +8,9 @@ namespace FileCabinetApp.CommandHandlers
 {
     public class FindCommandHandler : ServiceCommandHandlerBase
     {
-        private IRecordPrinter printer;
+        private Action<IEnumerable<FileCabinetRecord>> printer;
 
-        public FindCommandHandler(IFileCabinetService fileCabinetService, IRecordPrinter printer)
+        public FindCommandHandler(IFileCabinetService fileCabinetService, Action<IEnumerable<FileCabinetRecord>> printer)
             : base(fileCabinetService)
         {
             this.printer = printer;
@@ -83,7 +83,8 @@ namespace FileCabinetApp.CommandHandlers
                     }
                 }
 
-                return this.printer.Print(records);
+                this.printer(records);
+                return "Sucsecc!";
             }
             else
             {

@@ -11,9 +11,9 @@ namespace FileCabinetApp.CommandHandlers
         private Action<bool> running;
         private bool isRunning;
 
-        public ExitCommandHandler(bool isRunning)
+        public ExitCommandHandler(Action<bool> running)
         {
-            this.isRunning = isRunning;
+            this.running = running;
         }
 
         public override object Handle(AppComandRequest appComandRequest)
@@ -25,19 +25,13 @@ namespace FileCabinetApp.CommandHandlers
 
             if (appComandRequest.Command.Equals("exit"))
             {
-                this.running = ChangeRunning;
-                this.running(this.isRunning);
+                this.running(false);
                 return "Exiting an application...";
             }
             else
             {
                 return base.Handle(appComandRequest);
             }
-        }
-
-        private static void ChangeRunning(bool isRunning)
-        {
-            isRunning = false;
         }
     }
 }
