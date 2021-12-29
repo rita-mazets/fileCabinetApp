@@ -14,7 +14,7 @@ namespace FileCabinetApp
         /// <summary>
         /// Validates parameter.
         /// </summary>
-        /// <param name="fileCabinetRecord">Parameter to validate data.</param>
-        public void ValidateParameters(FileCabinetRecord fileCabinetRecord);
+        /// <param name="parameters">Parameter to validate data.</param>
+        public void ValidateParameters(FileCabinetRecord parameters);
     }
 }
