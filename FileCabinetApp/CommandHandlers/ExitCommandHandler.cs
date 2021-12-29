@@ -8,6 +8,13 @@ namespace FileCabinetApp.CommandHandlers
 {
     public class ExitCommandHandler : CommandHandlerBase
     {
+        private IFileCabinetService fileCabinetService;
+
+        public ExitCommandHandler(IFileCabinetService fileCabinetService)
+        {
+            this.fileCabinetService = fileCabinetService;
+        }
+
         public override object Handle(AppComandRequest appComandRequest)
         {
             if (appComandRequest is null)
