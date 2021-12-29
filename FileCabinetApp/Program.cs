@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Xml;
 using FileCabinetApp;
+using FileCabinetApp.CommandHandlers;
 
 namespace FileCabinetApp
 {
@@ -15,30 +16,30 @@ namespace FileCabinetApp
     {
         private const string DeveloperName = "Margarita Mazets";
         private const string HintMessage = "Enter your command, or enter 'help' to get help.";
-        private const int CommandHelpIndex = 0;
-        private const int DescriptionHelpIndex = 1;
-        private const int ExplanationHelpIndex = 2;
+        //private const int CommandHelpIndex = 0;
+        //private const int DescriptionHelpIndex = 1;
+        //private const int ExplanationHelpIndex = 2;
 
-        private static bool isRunning = true;
+        public static bool isRunning = true;
 
-        private static IFileCabinetService fileCabinetService;
+        public static IFileCabinetService fileCabinetService;
 
-        private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
+       /* private static Tuple<string, Action<string>>[] commands = new Tuple<string, Action<string>>[]
         {
             new Tuple<string, Action<string>>("help", PrintHelp),
-            new Tuple<string, Action<string>>("exit", Exit),
+            //new Tuple<string, Action<string>>("exit", Exit),
             new Tuple<string, Action<string>>("stat", Stat),
-            new Tuple<string, Action<string>>("create", Create),
+           // new Tuple<string, Action<string>>("create", Create),
             new Tuple<string, Action<string>>("list", List),
-            new Tuple<string, Action<string>>("edit", Edit),
+            //new Tuple<string, Action<string>>("edit", Edit),
             new Tuple<string, Action<string>>("find", Find),
-            new Tuple<string, Action<string>>("export", Export),
+            //new Tuple<string, Action<string>>("export", Export),
             new Tuple<string, Action<string>>("import", Import),
             new Tuple<string, Action<string>>("remove", Remove),
             new Tuple<string, Action<string>>("purge", Purge),
-        };
+        };*/
 
-        private static string[][] helpMessages = new string[][]
+        /*private static string[][] helpMessages = new string[][]
         {
             new string[] { "help", "prints the help screen", "The 'help' command prints the help screen." },
             new string[] { "exit", "exits the application", "The 'exit' command exits the application." },
@@ -51,7 +52,7 @@ namespace FileCabinetApp
             new string[] { "import", "import from csv or xml ", "The 'import' command import from csv or xml " },
             new string[] { "remove", "remove from file ", "The 'remove' command delete record " },
             new string[] { "purge", "purge date ", "The 'purge' command purge data " },
-        };
+        };*/
 
         /// <summary>
         /// The main program method.
@@ -68,17 +69,14 @@ namespace FileCabinetApp
             Console.WriteLine(Program.HintMessage);
             Console.WriteLine();
 
-            RemoveRecords r = new RemoveRecords();
-            r.Add(1);
-            r.Add(2);
-
-
             do
             {
                 Console.Write("> ");
                 var inputs = Console.ReadLine().Split(' ', 2);
                 const int commandIndex = 0;
+                const int parametersIndex = 1;
                 var command = inputs[commandIndex];
+                var parameters = inputs.Length > 1 ? inputs[parametersIndex] : string.Empty;
 
                 if (string.IsNullOrEmpty(command))
                 {
@@ -86,7 +84,11 @@ namespace FileCabinetApp
                     continue;
                 }
 
-                var index = Array.FindIndex(commands, 0, commands.Length, i => i.Item1.Equals(command, StringComparison.InvariantCultureIgnoreCase));
+                var commandHandler = CreateCommandHandlers();
+                var result = commandHandler.Handle(new AppComandRequest(command, parameters));
+                Console.WriteLine(result);
+                
+                /*var index = Array.FindIndex(commands, 0, commands.Length, i => i.Item1.Equals(command, StringComparison.InvariantCultureIgnoreCase));
                 if (index >= 0)
                 {
                     const int parametersIndex = 1;
@@ -96,9 +98,28 @@ namespace FileCabinetApp
                 else
                 {
                     PrintMissedCommandInfo(command);
-                }
+                }*/
             }
             while (isRunning);
+        }
+
+        private static ICommandHandler CreateCommandHandlers()
+        {
+            var helpHandler = new HelpCommandHandler();
+            var createHandler = new CreateCommandHandler();
+            var editHandler = new EditCommandHandler();
+            var exitHandler = new ExitCommandHandler();
+            var exportHandler = new ExportCommandHandler();
+            var findHandler = new FindCommandHandler();
+            var importHandler = new ImportCommandHandler();
+            var listHandler = new ListCommandHandler();
+            var purgeHandler = new PurgeCommandHandler();
+            var removeHandler = new RemoveCommandHandler();
+            var statHandler = new StatCommandHandler();
+
+            helpHandler.SetNext(createHandler).SetNext(editHandler).SetNext(exitHandler).SetNext(exportHandler).SetNext(findHandler).SetNext(importHandler).SetNext(listHandler).SetNext(purgeHandler).SetNext(removeHandler).SetNext(statHandler);
+
+            return helpHandler;
         }
 
         private static (string, string) ParseArgs(string[] argc)
@@ -210,7 +231,7 @@ namespace FileCabinetApp
             Console.WriteLine();
         }
 
-        private static void PrintHelp(string parameters)
+        /*private static void PrintHelp(string parameters)
         {
             if (!string.IsNullOrEmpty(parameters))
             {
@@ -235,21 +256,20 @@ namespace FileCabinetApp
             }
 
             Console.WriteLine();
-        }
+        }*/
 
-        private static void Exit(string parameters)
+        /*private static void Exit(string parameters)
         {
             Console.WriteLine("Exiting an application...");
             isRunning = false;
-        }
+        }*/
 
-        private static void Stat(string parameters)
+        /*private static void Stat(string parameters)
         {
             var (recordsCount, deletedRec) = Program.fileCabinetService.GetStat();
             Console.WriteLine($"{recordsCount} record(s).\n{deletedRec} deleted.");
-        }
-
-        private static void Create(string parameters)
+        }*/
+       /* private static void Create(string parameters)
         {
             try
             {
@@ -294,9 +314,9 @@ namespace FileCabinetApp
             type = ReadInput<char>(DataConverter.CharConverter, DataValidator.TypeValidator);
 
             return new FileCabinetRecord { FirstName = firstName, LastName = lastName, DateOfBirth = date, Height = height, Salary = salary, Type = type };
-        }
+        }*/
 
-        private static void List(string parameters)
+       /* private static void List(string parameters)
         {
             Console.WriteLine();
             var records = fileCabinetService.GetRecords();
@@ -306,9 +326,9 @@ namespace FileCabinetApp
             }
 
             Console.WriteLine();
-        }
+        }*/
 
-        private static void Edit(string parameters)
+        /*private static void Edit(string parameters)
         {
             Console.WriteLine();
             int id;
@@ -333,9 +353,9 @@ namespace FileCabinetApp
             }
 
             Console.WriteLine();
-        }
+        }*/
 
-        private static void Find(string parameters)
+        /*private static void Find(string parameters)
         {
             IEnumerable<FileCabinetRecord> records = Array.Empty<FileCabinetRecord>();
             var parametersArray = parameters.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -402,9 +422,9 @@ namespace FileCabinetApp
             }
 
             Console.WriteLine();
-        }
+        }*/
 
-        private static T ReadInput<T>(Func<string, ValueTuple<bool, string, T>> converter, Func<T, ValueTuple<bool, string>> validator)
+       /* private static T ReadInput<T>(Func<string, ValueTuple<bool, string, T>> converter, Func<T, ValueTuple<bool, string>> validator)
         {
             do
             {
@@ -431,9 +451,9 @@ namespace FileCabinetApp
                 return value;
             }
             while (true);
-        }
+        }*/
 
-        private static void Export(string parameters)
+        /*private static void Export(string parameters)
         {
             var parametersArray = parameters.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
@@ -499,9 +519,9 @@ namespace FileCabinetApp
             {
                 Console.WriteLine($"Export failed: can't open file {filePath}.");
             }
-        }
+        }*/
 
-        private static bool IsRewrite(string path)
+        /*private static bool IsRewrite(string path)
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -522,9 +542,9 @@ namespace FileCabinetApp
             }
 
             return false;
-        }
+        }*/
 
-        private static void Import(string parameters)
+        /*private static void Import(string parameters)
         {
             var parametersArray = parameters.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
@@ -569,9 +589,9 @@ namespace FileCabinetApp
                     }
                 }
             }
-        }
+        }*/
 
-        private static void Remove(string parameters)
+        /*private static void Remove(string parameters)
         {
             Console.WriteLine();
             int id;
@@ -592,15 +612,15 @@ namespace FileCabinetApp
             }
 
             Console.WriteLine();
-        }
+        }*/
 
-        private static void Purge(string parameters)
+        /*private static void Purge(string parameters)
         {
             var count = fileCabinetService.Purge();
             if (count > 0)
             {
                 Console.WriteLine($"Data file processing is completed: {count} were purged.");
             }
-        }
+        }*/
     }
 }
