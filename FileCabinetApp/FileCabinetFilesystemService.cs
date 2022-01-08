@@ -193,7 +193,7 @@ namespace FileCabinetApp
 
             List<FileCabinetRecord> cabinetList = new();
 
-            foreach (var item in list)
+            foreach (var item in result)
             {
                 if (item.IsDeleted != 1)
                 {
@@ -223,7 +223,7 @@ namespace FileCabinetApp
             var result = list.Where(item => item.LastName == lastName && item.IsDeleted != 1).ToList();
             List<FileCabinetRecord> cabinetList = new();
 
-            foreach (var item in list)
+            foreach (var item in result)
             {
                 if (item.IsDeleted != 1)
                 {
@@ -245,7 +245,7 @@ namespace FileCabinetApp
             var result = list.Where(item => item.DateOfBirth == dateOfBirth && item.IsDeleted != 1).ToList();
             List<FileCabinetRecord> cabinetList = new();
 
-            foreach (var item in list)
+            foreach (var item in result)
             {
                 if (item.IsDeleted != 1)
                 {
