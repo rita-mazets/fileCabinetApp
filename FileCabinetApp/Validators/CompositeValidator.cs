@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp.Validators
 {
-    public class CompositeValidator
+    public class CompositeValidator: IRecordValidator
     {
         private List<IRecordValidator> validators;
 

@@ -6,6 +6,7 @@ using System.IO;
 using System.Xml;
 using FileCabinetApp;
 using FileCabinetApp.CommandHandlers;
+using FileCabinetApp.Validators;
 
 namespace FileCabinetApp
 {
@@ -16,9 +17,6 @@ namespace FileCabinetApp
     {
         private const string DeveloperName = "Margarita Mazets";
         private const string HintMessage = "Enter your command, or enter 'help' to get help.";
-        //private const int CommandHelpIndex = 0;
-        //private const int DescriptionHelpIndex = 1;
-        //private const int ExplanationHelpIndex = 2;
 
         private static bool isRunning = true;
 
@@ -117,12 +115,14 @@ namespace FileCabinetApp
             {
                 if (nameValidationParam.Equals("default"))
                 {
-                    fileCabinetService = new FileCabinetMemoryService(new DefaultValidator());
+                    var validator = new ValidatorBuilder().CreateDefault();
+                    fileCabinetService = new FileCabinetMemoryService(validator);
                 }
 
                 if (nameValidationParam.Equals("custom"))
                 {
-                    fileCabinetService = new FileCabinetMemoryService(new CustomValidator());
+                    var validator = new ValidatorBuilder().CreateCustom();
+                    fileCabinetService = new FileCabinetMemoryService(validator);
                 }
             }
 
