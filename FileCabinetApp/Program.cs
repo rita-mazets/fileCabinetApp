@@ -87,6 +87,7 @@ namespace FileCabinetApp
             bool isValidationRules = false;
             bool isStorageRules = false;
             bool isUseStopWatch = false;
+            bool isUseLogger = false;
             bool isV = false;
             bool isS = false;
             string nameValidationParam = "default";
@@ -112,6 +113,13 @@ namespace FileCabinetApp
                     if (argc[i] == "-use-stopwatch")
                     {
                         isUseStopWatch = true;
+                        Console.WriteLine("Use StopWatch");
+                    }
+
+                    if (argc[i] == "-use-logger")
+                    {
+                        isUseLogger = true;
+                        Console.WriteLine("Use Logger");
                     }
 
                     (nameStorageParam, isStorageRules, isS) = CheckParam(argc[i], isStorageRules, isS, "--storage=", "-s", "memory", "file", nameStorageParam);
@@ -156,6 +164,11 @@ namespace FileCabinetApp
             if (isUseStopWatch)
             {
                 fileCabinetService = new ServiceMeter(fileCabinetService);
+            }
+
+            if (isUseLogger)
+            {
+                fileCabinetService = new ServiceLogger(fileCabinetService);
             }
 
             return (nameValidationParam, nameStorageParam);
