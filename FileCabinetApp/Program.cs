@@ -86,6 +86,7 @@ namespace FileCabinetApp
         {
             bool isValidationRules = false;
             bool isStorageRules = false;
+            bool isUseStopWatch = false;
             bool isV = false;
             bool isS = false;
             string nameValidationParam = "default";
@@ -106,6 +107,11 @@ namespace FileCabinetApp
                         {
                             i++;
                         }
+                    }
+
+                    if (argc[i] == "-use-stopwatch")
+                    {
+                        isUseStopWatch = true;
                     }
 
                     (nameStorageParam, isStorageRules, isS) = CheckParam(argc[i], isStorageRules, isS, "--storage=", "-s", "memory", "file", nameStorageParam);
@@ -145,6 +151,11 @@ namespace FileCabinetApp
                     var validator = new ValidatorBuilder().CreateCustom(validateParamCustom);
                     fileCabinetService = new FileCabinetFilesystemService(new FileStream("cabinet-records.db", FileMode.OpenOrCreate), validator);
                 }
+            }
+
+            if (isUseStopWatch)
+            {
+                fileCabinetService = new ServiceMeter(fileCabinetService);
             }
 
             return (nameValidationParam, nameStorageParam);
@@ -225,15 +236,15 @@ namespace FileCabinetApp
                 throw new ArgumentNullException(nameof(config));
             }
 
-            validateParam.FirstNameMin = config[validator + ":firstname:min"] is null ? Convert.ToInt32(config[validator + ":firstname:min"], CultureInfo.CurrentCulture) : 0;
-            validateParam.FirstNameMax = config[validator + ":firstname:max"] is null ? Convert.ToInt32(config[validator + ":firstname:max"], CultureInfo.CurrentCulture) : int.MaxValue;
-            validateParam.LastNameMin = config[validator + ":lastname:min"] is null ? Convert.ToInt32(config[validator + ":lastname:min"], CultureInfo.CurrentCulture) : 0;
-            validateParam.LastNameMax = config[validator + ":lastname:max"] is null ? Convert.ToInt32(config[validator + ":firstname:max"], CultureInfo.CurrentCulture) : int.MaxValue;
-            validateParam.DateOfBirthFrom = config[validator + ":dateOfbirth:from"] is null ? Convert.ToDateTime(config[validator + ":dateOfbirth:from"], CultureInfo.CurrentCulture) : new DateTime(1900);
-            validateParam.DateOfBirthTo = config[validator + ":dateOfbirth:to"] is null ? Convert.ToDateTime(config[validator + ":dateOfbirth:to"], CultureInfo.CurrentCulture) : DateTime.Now;
-            validateParam.HeightMin = config[validator + ":height:min"] is null ? Convert.ToInt32(config[validator + ":height:min"], CultureInfo.CurrentCulture) : 0;
-            validateParam.HeightMax = config[validator + ":height:max"] is null ? Convert.ToInt32(config[validator + ":height:max"], CultureInfo.CurrentCulture) : short.MaxValue;
-            validateParam.SalaryMin = config[validator + ":salary:min"] is null ? Convert.ToInt32(config[validator + ":salary:min"], CultureInfo.CurrentCulture) : 0;
+            validateParam.FirstNameMin = config[validator + ":firstname:min"] is not null ? Convert.ToInt32(config[validator + ":firstname:min"], CultureInfo.CurrentCulture) : 0;
+            validateParam.FirstNameMax = config[validator + ":firstname:max"] is not null ? Convert.ToInt32(config[validator + ":firstname:max"], CultureInfo.CurrentCulture) : int.MaxValue;
+            validateParam.LastNameMin = config[validator + ":lastname:min"] is not null ? Convert.ToInt32(config[validator + ":lastname:min"], CultureInfo.CurrentCulture) : 0;
+            validateParam.LastNameMax = config[validator + ":lastname:max"] is not null ? Convert.ToInt32(config[validator + ":firstname:max"], CultureInfo.CurrentCulture) : int.MaxValue;
+            validateParam.DateOfBirthFrom = config[validator + ":dateOfbirth:from"] is not null ? Convert.ToDateTime(config[validator + ":dateOfbirth:from"], CultureInfo.CurrentCulture) : new DateTime(1900);
+            validateParam.DateOfBirthTo = config[validator + ":dateOfbirth:to"] is not null ? Convert.ToDateTime(config[validator + ":dateOfbirth:to"], CultureInfo.CurrentCulture) : DateTime.Now;
+            validateParam.HeightMin = config[validator + ":height:min"] is not null ? Convert.ToInt32(config[validator + ":height:min"], CultureInfo.CurrentCulture) : 0;
+            validateParam.HeightMax = config[validator + ":height:max"] is not null ? Convert.ToInt32(config[validator + ":height:max"], CultureInfo.CurrentCulture) : short.MaxValue;
+            validateParam.SalaryMin = config[validator + ":salary:min"] is not null ? Convert.ToInt32(config[validator + ":salary:min"], CultureInfo.CurrentCulture) : 0;
 
             return validateParam;
         }
