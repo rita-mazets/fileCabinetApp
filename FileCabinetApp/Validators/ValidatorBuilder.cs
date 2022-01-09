@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -51,14 +52,14 @@ namespace FileCabinetApp.Validators
             return this;
         }
 
-        public IRecordValidator CreateDefault()
+        public IRecordValidator CreateDefault(ValidateParam param)
         {
-            return new DefaultValidator();
+            return new DefaultValidator(param);
         }
 
-        public IRecordValidator CreateCustom()
+        public IRecordValidator CreateCustom(ValidateParam param)
         {
-            return new CustomValidator();
+            return new CustomValidator(param);
         }
     }
 }

@@ -9,7 +9,7 @@ namespace FileCabinetApp
 {
     public static class DataValidator
     {
-        private static (bool, string) NameValidator(string value)
+        public static (bool, string) NameValidator(string value)
         {
             if (string.IsNullOrWhiteSpace(value) || value.Length < 2 || value.Length > 60)
             {
@@ -19,7 +19,7 @@ namespace FileCabinetApp
             return (true, value);
         }
 
-        private static (bool, string) DateValidator(DateTime value)
+        public static (bool, string) DateValidator(DateTime value)
         {
             if (value < new DateTime(1950, 1, 1) || value > DateTime.Now)
             {
@@ -29,7 +29,7 @@ namespace FileCabinetApp
             return (true, value.ToString(CultureInfo.CurrentCulture));
         }
 
-        private static (bool, string) HeightValidator(short value)
+        public static (bool, string) HeightValidator(short value)
         {
             if (value < 0 || value > 250)
             {
@@ -39,7 +39,7 @@ namespace FileCabinetApp
             return (true, value.ToString(CultureInfo.CurrentCulture));
         }
 
-        private static (bool, string) SalaryValidator(decimal value)
+        public static (bool, string) SalaryValidator(decimal value)
         {
             if (value < 0)
             {
@@ -49,7 +49,7 @@ namespace FileCabinetApp
             return (true, value.ToString(CultureInfo.CurrentCulture));
         }
 
-        private static (bool, string) TypeValidator(char value)
+        public static (bool, string) TypeValidator(char value)
         {
             if (!char.IsLetter(value))
             {

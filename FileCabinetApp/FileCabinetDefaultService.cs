@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace FileCabinetApp
 {
@@ -14,8 +15,8 @@ namespace FileCabinetApp
         /// <summary>
         /// Initializes a new instance of the <see cref="FileCabinetDefaultService"/> class.
         /// </summary>
-        public FileCabinetDefaultService()
-            : base(new DefaultValidator())
+        public FileCabinetDefaultService(ValidateParam param)
+            : base(new DefaultValidator(param))
         {
         }
     }

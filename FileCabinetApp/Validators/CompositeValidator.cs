@@ -12,7 +12,7 @@ namespace FileCabinetApp.Validators
 
         public CompositeValidator(IEnumerable<IRecordValidator> validators)
         {
-            this.validators = (List<IRecordValidator>)validators;
+            this.validators = validators.ToList();
         }
 
         public void ValidateParameters(FileCabinetRecord parameters)

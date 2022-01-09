@@ -7,6 +7,8 @@ using System.Xml;
 using FileCabinetApp;
 using FileCabinetApp.CommandHandlers;
 using FileCabinetApp.Validators;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 
 namespace FileCabinetApp
 {
@@ -28,8 +30,9 @@ namespace FileCabinetApp
         /// <param name="args">Sets command line parameters.</param>
         public static void Main(string[] args)
         {
+            IConfiguration config = new ConfigurationBuilder().AddJsonFile("validate-rule.json", true, true).Build();
             string nameValidationParam, nameStorageParam;
-            (nameValidationParam, nameStorageParam) = ParseArgs(args);
+            (nameValidationParam, nameStorageParam) = ParseArgs(args, config);
 
             Console.WriteLine($"File Cabinet Application, developed by {Program.DeveloperName}");
             Console.WriteLine($"Using {nameValidationParam} validation rules.");
@@ -79,7 +82,7 @@ namespace FileCabinetApp
             return helpHandler;
         }
 
-        private static (string, string) ParseArgs(string[] argc)
+        private static (string, string) ParseArgs(string[] argc, IConfiguration config)
         {
             bool isValidationRules = false;
             bool isStorageRules = false;
@@ -87,6 +90,9 @@ namespace FileCabinetApp
             bool isS = false;
             string nameValidationParam = "default";
             string nameStorageParam = "memory";
+
+            var validateParamDefault = ConvertToValidateParam(config, "default");
+            var validateParamCustom = ConvertToValidateParam(config, "custom");
 
             if (argc is not null)
             {
@@ -115,13 +121,13 @@ namespace FileCabinetApp
             {
                 if (nameValidationParam.Equals("default"))
                 {
-                    var validator = new ValidatorBuilder().CreateDefault();
+                    var validator = new ValidatorBuilder().CreateDefault(validateParamDefault);
                     fileCabinetService = new FileCabinetMemoryService(validator);
                 }
 
                 if (nameValidationParam.Equals("custom"))
                 {
-                    var validator = new ValidatorBuilder().CreateCustom();
+                    var validator = new ValidatorBuilder().CreateCustom(validateParamCustom);
                     fileCabinetService = new FileCabinetMemoryService(validator);
                 }
             }
@@ -130,12 +136,14 @@ namespace FileCabinetApp
             {
                 if (nameValidationParam.Equals("default"))
                 {
-                    fileCabinetService = new FileCabinetFilesystemService(new FileStream("cabinet-records.db", FileMode.OpenOrCreate), new DefaultValidator());
+                    var validator = new ValidatorBuilder().CreateDefault(validateParamDefault);
+                    fileCabinetService = new FileCabinetFilesystemService(new FileStream("cabinet-records.db", FileMode.OpenOrCreate), validator);
                 }
 
                 if (nameValidationParam.Equals("custom"))
                 {
-                    fileCabinetService = new FileCabinetFilesystemService(new FileStream("cabinet-records.db", FileMode.OpenOrCreate), new CustomValidator());
+                    var validator = new ValidatorBuilder().CreateCustom(validateParamCustom);
+                    fileCabinetService = new FileCabinetFilesystemService(new FileStream("cabinet-records.db", FileMode.OpenOrCreate), validator);
                 }
             }
 
@@ -206,6 +214,28 @@ namespace FileCabinetApp
         private static void ChangeRunning(bool isRunning)
         {
             Program.isRunning = isRunning;
+        }
+
+        private static ValidateParam ConvertToValidateParam(IConfiguration config, string validator)
+        {
+            var validateParam = new ValidateParam();
+
+            if (config is null)
+            {
+                throw new ArgumentNullException(nameof(config));
+            }
+
+            validateParam.FirstNameMin = config[validator + ":firstname:min"] is null ? Convert.ToInt32(config[validator + ":firstname:min"], CultureInfo.CurrentCulture) : 0;
+            validateParam.FirstNameMax = config[validator + ":firstname:max"] is null ? Convert.ToInt32(config[validator + ":firstname:max"], CultureInfo.CurrentCulture) : int.MaxValue;
+            validateParam.LastNameMin = config[validator + ":lastname:min"] is null ? Convert.ToInt32(config[validator + ":lastname:min"], CultureInfo.CurrentCulture) : 0;
+            validateParam.LastNameMax = config[validator + ":lastname:max"] is null ? Convert.ToInt32(config[validator + ":firstname:max"], CultureInfo.CurrentCulture) : int.MaxValue;
+            validateParam.DateOfBirthFrom = config[validator + ":dateOfbirth:from"] is null ? Convert.ToDateTime(config[validator + ":dateOfbirth:from"], CultureInfo.CurrentCulture) : new DateTime(1900);
+            validateParam.DateOfBirthTo = config[validator + ":dateOfbirth:to"] is null ? Convert.ToDateTime(config[validator + ":dateOfbirth:to"], CultureInfo.CurrentCulture) : DateTime.Now;
+            validateParam.HeightMin = config[validator + ":height:min"] is null ? Convert.ToInt32(config[validator + ":height:min"], CultureInfo.CurrentCulture) : 0;
+            validateParam.HeightMax = config[validator + ":height:max"] is null ? Convert.ToInt32(config[validator + ":height:max"], CultureInfo.CurrentCulture) : short.MaxValue;
+            validateParam.SalaryMin = config[validator + ":salary:min"] is null ? Convert.ToInt32(config[validator + ":salary:min"], CultureInfo.CurrentCulture) : 0;
+
+            return validateParam;
         }
     }
 }

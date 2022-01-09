@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Globalization;
 using FileCabinetApp.Validators;
+using Microsoft.Extensions.Configuration;
 
 namespace FileCabinetApp
 {
@@ -8,15 +10,15 @@ namespace FileCabinetApp
     /// </summary>
     public class CustomValidator : CompositeValidator, IRecordValidator
     {
-        public CustomValidator()
+        public CustomValidator(ValidateParam param)
             : base(new IRecordValidator[]
             {
-                new FirstNameValidator(2, 100),
-                new LastNameValidator(2, 100),
-                new DateOfBirthValidator(new DateTime(1940, 1, 1), DateTime.Now),
-                new HeightValidator(70, 250),
-                new SalaryValidator(100),
-                new TypeValidator(),
+               new FirstNameValidator(param.FirstNameMin, param.FirstNameMax),
+               new LastNameValidator(param.LastNameMin, param.LastNameMax),
+               new DateOfBirthValidator(param.DateOfBirthFrom, param.DateOfBirthTo),
+               new HeightValidator(param.HeightMin, param.HeightMax),
+               new SalaryValidator(param.SalaryMin),
+               new TypeValidator(),
             })
         {
         }
