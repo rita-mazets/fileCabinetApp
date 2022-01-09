@@ -220,6 +220,11 @@ namespace FileCabinetApp
             }
         }
 
+        public int Insert(FileCabinetRecord fileCabinetRecord)
+        {
+            throw new NotImplementedException();
+        }
+
         public int Purge()
         {
             using (var stream = new StreamWriter(this.fileName, true))

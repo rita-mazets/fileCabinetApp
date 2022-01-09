@@ -86,6 +86,11 @@ namespace FileCabinetApp
             return result;
         }
 
+        public int Insert(FileCabinetRecord fileCabinetRecord)
+        {
+            throw new NotImplementedException();
+        }
+
         public int Purge()
         {
             Stopwatch stopWatch = new();

@@ -308,5 +308,10 @@ namespace FileCabinetApp
         {
             return -1;
         }
+
+        public int Insert(FileCabinetRecord fileCabinetRecord)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

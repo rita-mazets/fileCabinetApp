@@ -388,5 +388,10 @@ namespace FileCabinetApp
 
             return count;
         }
+
+        public int Insert(FileCabinetRecord fileCabinetRecord)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

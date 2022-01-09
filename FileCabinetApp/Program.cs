@@ -76,8 +76,9 @@ namespace FileCabinetApp
             var purgeHandler = new PurgeCommandHandler(Program.fileCabinetService);
             var removeHandler = new RemoveCommandHandler(Program.fileCabinetService);
             var statHandler = new StatCommandHandler(Program.fileCabinetService);
+            var insertHandler = new InsertCommandHandler(Program.fileCabinetService);
 
-            helpHandler.SetNext(createHandler).SetNext(editHandler).SetNext(exitHandler).SetNext(exportHandler).SetNext(findHandler).SetNext(importHandler).SetNext(listHandler).SetNext(purgeHandler).SetNext(removeHandler).SetNext(statHandler);
+            helpHandler.SetNext(createHandler).SetNext(editHandler).SetNext(exitHandler).SetNext(exportHandler).SetNext(findHandler).SetNext(importHandler).SetNext(listHandler).SetNext(purgeHandler).SetNext(removeHandler).SetNext(statHandler).SetNext(insertHandler);
 
             return helpHandler;
         }

@@ -20,6 +20,13 @@ namespace FileCabinetApp
         public int CreateRecord(FileCabinetRecord fileCabinetRecord);
 
         /// <summary>
+        /// Creates new record and return id.
+        /// </summary>
+        /// <param name="fileCabinetRecord">Parameter to insert data.</param>
+        /// <returns>Record id.</returns>
+        public int Insert(FileCabinetRecord fileCabinetRecord);
+
+        /// <summary>
         /// Gets all records.
         /// </summary>
         /// <returns>All records.</returns>
