@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -166,12 +167,7 @@ namespace FileCabinetApp
                     {
                         recordToBytes = RecordToBytes(fileCabinetRecord);
                     }
-                    /*record.FirstName = fileCabinetRecord.FirstName;
-                    record.LastName = fileCabinetRecord.LastName;
-                    record.DateOfBirth = fileCabinetRecord.DateOfBirth;
-                    record.Height = fileCabinetRecord.Height;
-                    record.Salary = fileCabinetRecord.Salary;
-                    record.Type = fileCabinetRecord.Type;*/
+
                     this.fileStream.Seek(offset * recordSize, SeekOrigin.Begin);
                     this.fileStream.Write(recordToBytes, 0, recordToBytes.Length);
                     break;
@@ -389,9 +385,105 @@ namespace FileCabinetApp
             return count;
         }
 
-        public int Insert(FileCabinetRecord fileCabinetRecord)
+        public void Delete(string name, string value)
         {
-            throw new NotImplementedException();
+            switch (name)
+            {
+                case "id":
+                    this.Remove(Convert.ToInt32(value, CultureInfo.CurrentCulture));
+                    break;
+                case "firstname":
+                    this.DeleteItem(this.FindByFirstName(value));
+                    break;
+                case "lastname":
+                    this.DeleteItem(this.FindByLastName(value));
+                    break;
+                case "dateofbirth":
+                    this.DeleteItem(this.FindDateOfBirth(Convert.ToDateTime(value, CultureInfo.CurrentCulture)));
+                    break;
+                case "height":
+                    this.DeleteItem(this.FindByHeight(Convert.ToInt16(value, CultureInfo.CurrentCulture)));
+                    break;
+                case "salary":
+                    this.DeleteItem(this.FindBySalary(Convert.ToDecimal(value, CultureInfo.CurrentCulture)));
+                    break;
+                case "type":
+                    this.DeleteItem(this.FindByType(value[0]));
+                    break;
+            }
+        }
+
+        public ReadOnlyCollection<FileCabinetRecord> FindByType(char type)
+        {
+            var list = this.ReturnRecordList();
+            var result = list.Where(item => item.Type == type && item.IsDeleted != 1).ToList();
+
+            List<FileCabinetRecord> cabinetList = new();
+
+            foreach (var item in result)
+            {
+                if (item.IsDeleted != 1)
+                {
+                    cabinetList.Add((FileCabinetRecord)item);
+                }
+            }
+
+            return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
+        }
+
+        public ReadOnlyCollection<FileCabinetRecord> FindBySalary(decimal salary)
+        {
+            var list = this.ReturnRecordList();
+            var result = list.Where(item => item.Salary == salary && item.IsDeleted != 1).ToList();
+
+            List<FileCabinetRecord> cabinetList = new();
+
+            foreach (var item in result)
+            {
+                if (item.IsDeleted != 1)
+                {
+                    cabinetList.Add((FileCabinetRecord)item);
+                }
+            }
+
+            return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
+        }
+
+        public ReadOnlyCollection<FileCabinetRecord> FindByHeight(short height)
+        {
+            var list = this.ReturnRecordList();
+            var result = list.Where(item => item.Height == height && item.IsDeleted != 1).ToList();
+
+            List<FileCabinetRecord> cabinetList = new();
+
+            foreach (var item in result)
+            {
+                if (item.IsDeleted != 1)
+                {
+                    cabinetList.Add((FileCabinetRecord)item);
+                }
+            }
+
+            return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
+        }
+
+        private void DeleteItem(ReadOnlyCollection<FileCabinetRecord> records)
+        {
+            if (records is null)
+            {
+                Console.WriteLine("Records with this parameter not found");
+            }
+            else
+            {
+                var text = string.Empty;
+                foreach (var record in records)
+                {
+                    this.Remove(record.Id);
+                    text += $"#{record.Id}";
+                }
+
+                Console.WriteLine($"Records with id {text} was deleted.");
+            }
         }
     }
 }

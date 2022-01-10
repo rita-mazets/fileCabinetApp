@@ -309,9 +309,72 @@ namespace FileCabinetApp
             return -1;
         }
 
-        public int Insert(FileCabinetRecord fileCabinetRecord)
+        public void Delete(string name, string value)
         {
-            throw new NotImplementedException();
+            switch (name)
+            {
+                case "id":
+                    this.Remove(Convert.ToInt32(value, CultureInfo.CurrentCulture));
+                    break;
+                case "firstname":
+                    this.DeleteItem(this.FindByFirstName(value));
+                    break;
+                case "lastname":
+                    this.DeleteItem(this.FindByLastName(value));
+                    break;
+                case "dateofbirth":
+                    this.DeleteItem(this.FindDateOfBirth(Convert.ToDateTime(value, CultureInfo.CurrentCulture)));
+                    break;
+                case "height":
+                    this.DeleteItem(this.FindByHeight(Convert.ToInt16(value, CultureInfo.CurrentCulture)));
+                    break;
+                case "salary":
+                    this.DeleteItem(this.FindBySalary(Convert.ToDecimal(value, CultureInfo.CurrentCulture)));
+                    break;
+                case "type":
+                    this.DeleteItem(this.FindByType(value[0]));
+                    break;
+            }
+        }
+
+        private ReadOnlyCollection<FileCabinetRecord> FindByType(char type)
+        {
+            var result = this.list.Where(item => item.Type == type).ToList();
+
+            return new ReadOnlyCollection<FileCabinetRecord>(result);
+        }
+
+        private ReadOnlyCollection<FileCabinetRecord> FindBySalary(decimal salary)
+        {
+            var result = this.list.Where(item => item.Salary == salary).ToList();
+
+            return new ReadOnlyCollection<FileCabinetRecord>(result);
+        }
+
+        private ReadOnlyCollection<FileCabinetRecord> FindByHeight(short height)
+        {
+            var result = this.list.Where(item => item.Height == height).ToList();
+
+            return new ReadOnlyCollection<FileCabinetRecord>(result);
+        }
+
+        private void DeleteItem(ReadOnlyCollection<FileCabinetRecord> records)
+        {
+            if (records is null)
+            {
+                Console.WriteLine("Records with this parameter not found");
+            }
+            else
+            {
+                var text = string.Empty;
+                foreach (var record in records)
+                {
+                    this.Remove(record.Id);
+                    text += $"#{record.Id}";
+                }
+
+                Console.WriteLine($"Records with id {text} was deleted.");
+            }
         }
     }
 }

@@ -27,6 +27,15 @@ namespace FileCabinetApp
             return result;
         }
 
+        public void Delete(string name, string value)
+        {
+            Stopwatch stopWatch = new();
+            stopWatch.Start();
+            this.service.Delete(name, value);
+            stopWatch.Stop();
+            Console.WriteLine($"Create method execution duration is {stopWatch.ElapsedTicks} ticks.");
+        }
+
         public void EditRecord(FileCabinetRecord fileCabinetRecord)
         {
             Stopwatch stopWatch = new ();
