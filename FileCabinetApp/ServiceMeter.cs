@@ -36,15 +36,6 @@ namespace FileCabinetApp
             Console.WriteLine($"Create method execution duration is {stopWatch.ElapsedTicks} ticks.");
         }
 
-        public void EditRecord(FileCabinetRecord fileCabinetRecord)
-        {
-            Stopwatch stopWatch = new ();
-            stopWatch.Start();
-            this.service.EditRecord(fileCabinetRecord);
-            stopWatch.Stop();
-            Console.WriteLine($"EditRecord method execution duration is {stopWatch.ElapsedTicks} ticks.");
-        }
-
         public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
         {
             Stopwatch stopWatch = new();
@@ -108,15 +99,6 @@ namespace FileCabinetApp
             stopWatch.Stop();
             Console.WriteLine($"Purge method execution duration is {stopWatch.ElapsedTicks} ticks.");
             return result;
-        }
-
-        public void Remove(int id)
-        {
-            Stopwatch stopWatch = new ();
-            stopWatch.Start();
-            this.service.Remove(id);
-            stopWatch.Stop();
-            Console.WriteLine($"Remove method execution duration is {stopWatch.ElapsedTicks} ticks.");
         }
 
         public ReadOnlyCollection<FileCabinetRecord> Restore(FileCabinetServiceSnapshot snapshot)

@@ -76,35 +76,6 @@ namespace FileCabinetApp
             }
         }
 
-        public void EditRecord(FileCabinetRecord fileCabinetRecord)
-        {
-            if (fileCabinetRecord is null)
-            {
-                throw new ArgumentNullException(nameof(fileCabinetRecord));
-            }
-
-            using (var stream = new StreamWriter(this.fileName, true))
-            {
-                try
-                {
-                    Stopwatch stopWatch = new ();
-                    var text = $"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Calling Edit() with FirsrName = \"{fileCabinetRecord.FirstName}\", LastName = \"{fileCabinetRecord.LastName}\", DateOfBirth = \"{fileCabinetRecord.DateOfBirth}\", Height = \"{fileCabinetRecord.Height}\", Salary = \"{fileCabinetRecord.Salary}\", Type = \"{fileCabinetRecord.Type}\". ";
-                    stream.WriteLine(text);
-
-                    stopWatch.Start();
-                    this.service.EditRecord(fileCabinetRecord);
-                    stopWatch.Stop();
-                    stream.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Edit() was completed in time {stopWatch.ElapsedTicks} ticks");
-
-                    Console.WriteLine($"EditRecord method execution duration is {stopWatch.ElapsedTicks} ticks.");
-                }
-                catch (Exception e)
-                {
-                    stream.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Exeption: {e.Message}");
-                }
-            }
-        }
-
         public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
         {
             if (string.IsNullOrEmpty(firstName))
@@ -272,30 +243,6 @@ namespace FileCabinetApp
                 {
                     stream.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Exeption: {e.Message}");
                     return -1;
-                }
-            }
-        }
-
-        public void Remove(int id)
-        {
-            using (var stream = new StreamWriter(this.fileName, true))
-            {
-                try
-                {
-                    Stopwatch stopWatch = new ();
-                    var text = $"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Calling Remove() with id = \"{id}\". ";
-                    stream.WriteLine(text);
-
-                    stopWatch.Start();
-                    this.service.Remove(id);
-                    stopWatch.Stop();
-                    stream.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Purge() was completed in time {stopWatch.ElapsedTicks} ticks");
-
-                    Console.WriteLine($"Remove method execution duration is {stopWatch.ElapsedTicks} ticks.");
-                }
-                catch (Exception e)
-                {
-                    stream.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Exeption: {e.Message}");
                 }
             }
         }

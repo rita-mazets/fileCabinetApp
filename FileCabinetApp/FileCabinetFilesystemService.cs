@@ -141,7 +141,7 @@ namespace FileCabinetApp
         /// Edits an existing record.
         /// </summary>
         /// <param name="fileCabinetRecord">Parameter to edit data.</param>
-        public void EditRecord(FileCabinetRecord fileCabinetRecord)
+        private void EditRecord(FileCabinetRecord fileCabinetRecord)
         {
             if (fileCabinetRecord is null)
             {
@@ -349,7 +349,7 @@ namespace FileCabinetApp
             return snapshot.Records;
         }
 
-        public void Remove(int id)
+        private void Remove(int id)
         {
             var record = new FileRecord { Id = id, IsDeleted = 1 };
             this.EditRecord(record);

@@ -44,12 +44,6 @@ namespace FileCabinetApp
         public (int, int) GetStat();
 
         /// <summary>
-        /// Edits an existing record.
-        /// </summary>
-        /// <param name="fileCabinetRecord">Parameter to edit data.</param>
-        public void EditRecord(FileCabinetRecord fileCabinetRecord);
-
-        /// <summary>
         /// Searches in the dictionary for data by firstName and return array where FirstName is equal firstName .
         /// </summary>
         /// <param name="firstName">Param to search.</param>
@@ -72,7 +66,6 @@ namespace FileCabinetApp
 
         public ReadOnlyCollection<FileCabinetRecord> Restore(FileCabinetServiceSnapshot snapshot);
 
-        public void Remove(int id);
 
         public int Purge();
     }

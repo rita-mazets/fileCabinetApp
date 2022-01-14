@@ -30,9 +30,10 @@ namespace FileCabinetApp.CommandHandlers
                 {
                     Console.WriteLine(e.Message);
                 }
+                return "Success!";
             }
 
-            return "";
+            return base.Handle(appComandRequest);
         }
     }
 }
