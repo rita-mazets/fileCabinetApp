@@ -111,6 +111,15 @@ namespace FileCabinetApp
             return result;
         }
 
+        public void Select(string parameters)
+        {
+            Stopwatch stopWatch = new();
+            stopWatch.Start();
+            this.service.Select(parameters);
+            stopWatch.Stop();
+            Console.WriteLine($"Update method execution duration is {stopWatch.ElapsedTicks} ticks.");
+        }
+
         public void Update(string parameters)
         {
             Stopwatch stopWatch = new ();

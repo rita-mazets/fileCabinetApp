@@ -32,6 +32,12 @@ namespace FileCabinetApp
         public void Update(string parameters);
 
         /// <summary>
+        /// Creates new record and return id.
+        /// </summary>
+        /// <param name="fileCabinetRecord">Parameter to insert data.</param>
+        public void Select(string parameters);
+
+        /// <summary>
         /// Gets all records.
         /// </summary>
         /// <returns>All records.</returns>

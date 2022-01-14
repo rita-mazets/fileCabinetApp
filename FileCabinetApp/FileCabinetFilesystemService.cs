@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ConsoleTables;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -564,28 +565,43 @@ namespace FileCabinetApp
                 }
             }
 
-
-
             this.EditRecord(record);
         }
 
-        private List<FileCabinetRecord> WriteParamAfterWhere(string param)
+        private ReadOnlyCollection<FileCabinetRecord> WriteParamAfterWhere(string param)
         {
-            List<FileCabinetRecord> records = new();
-            var keyValues = param.Split("and", StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < keyValues.Length; i++)
+            ReadOnlyCollection<FileCabinetRecord> records = new ReadOnlyCollection<FileCabinetRecord>(new List<FileCabinetRecord>());
+            string[] keyValues;
+            if (param.Contains("or"))
             {
-                if (i == 0)
+                List<FileCabinetRecord> result = new();
+                keyValues = param.Split("or", StringSplitOptions.RemoveEmptyEntries);
+
+                for (int i = 0; i < keyValues.Length; i++)
                 {
-                    records = FindRecordsByParameters(this.GetRecords().ToList(), keyValues[i]);
+                    result.AddRange(FindRecordsByParameters(this.GetRecords(), keyValues[i]));
                 }
-                else
+
+                records = new ReadOnlyCollection<FileCabinetRecord>(result);
+            }
+            else
+            {
+                keyValues = param.Split("and", StringSplitOptions.RemoveEmptyEntries);
+
+                for (int i = 0; i < keyValues.Length; i++)
                 {
-                    records = FindRecordsByParameters(records, keyValues[i]);
+                    if (i == 0)
+                    {
+                        records = FindRecordsByParameters(this.GetRecords(), keyValues[i]);
+                    }
+                    else
+                    {
+                        records = FindRecordsByParameters(records, keyValues[i]);
+                    }
                 }
             }
 
-            if (keyValues.Length == 0)
+            if (keyValues is null)
             {
                 return null;
             }
@@ -594,7 +610,7 @@ namespace FileCabinetApp
         }
 
 
-        private static List<FileCabinetRecord> FindRecordsByParameters(List<FileCabinetRecord> records, string keyValue)
+        private static ReadOnlyCollection<FileCabinetRecord> FindRecordsByParameters(IEnumerable<FileCabinetRecord> records, string keyValue)
         {
             List<FileCabinetRecord> result = new();
             var param = keyValue.Split("=");
@@ -627,7 +643,109 @@ namespace FileCabinetApp
                     throw new ArgumentException("Incorrect parametr after where");
             }
 
-            return result;
+            return new ReadOnlyCollection<FileCabinetRecord>(result);
+        }
+
+        public void Select(string parameters)
+        {
+            var param = parameters.ToLower(CultureInfo.CurrentCulture).Split("where");
+
+            if (string.IsNullOrEmpty(parameters))
+            {
+                throw new ArgumentException("Parameters not write.");
+            }
+
+            var nameString = this.WriteParamAfterSelect(param[0]);
+
+            if (param.Length == 1)
+            {
+                this.PrintTable(nameString.ToArray(), this.GetRecords());
+            }
+
+            if (param.Length == 2)
+            {
+                var afterWhere = this.WriteParamAfterWhere(param[1]);
+                this.PrintTable(nameString.ToArray(), afterWhere);
+            }
+        }
+
+        private void PrintTable(string[] namesString, IEnumerable<FileCabinetRecord> records)
+        {
+            var table = new ConsoleTable(namesString);
+
+            foreach (var record in records)
+            {
+                List<object> values = new List<object>();
+                foreach (var item in namesString)
+                {
+                    switch (item.ToLower(CultureInfo.CurrentCulture))
+                    {
+                        case "id":
+                            values.Add(record.Id);
+                            break;
+                        case "firstname":
+                            values.Add(record.FirstName);
+                            break;
+                        case "lastname":
+                            values.Add(record.LastName);
+                            break;
+                        case "dateofbirth":
+                            values.Add(record.DateOfBirth.ToString("dd/MM/yyyy", CultureInfo.CurrentCulture));
+                            break;
+                        case "heigth":
+                            values.Add(record.Height);
+                            break;
+                        case "salary":
+                            values.Add(record.Salary);
+                            break;
+                        case "type":
+                            values.Add(record.Type);
+                            break;
+                    }
+                }
+
+                table.AddRow(values.ToArray());
+            }
+
+            table.Configure(o => o.NumberAlignment = Alignment.Right).Write(Format.Alternative);
+        }
+
+        private List<string> WriteParamAfterSelect(string param)
+        {
+            var values = param.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            List<string> nameString = new();
+            for (int i = 0; i < values.Length; i++)
+            {
+                values[i] = values[i].Trim(' ');
+                switch (values[i])
+                {
+                    case "id":
+                        nameString.Add("Id");
+                        break;
+                    case "firstname":
+                        nameString.Add("FirstName");
+                        break;
+                    case "lastname":
+                        nameString.Add("LastName");
+                        break;
+                    case "dateofbirth":
+                        nameString.Add("DateOfBirth");
+                        break;
+                    case "heigth":
+                        nameString.Add("Heigth");
+                        break;
+                    case "salary":
+                        nameString.Add("Salary");
+                        break;
+                    case "type":
+                        nameString.Add("Type");
+                        break;
+                    default:
+                        throw new ArgumentException("incorrect parametr after select");
+                }
+            }
+
+            return nameString;
         }
     }
 }
