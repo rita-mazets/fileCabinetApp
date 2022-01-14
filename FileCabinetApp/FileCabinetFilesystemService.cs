@@ -652,7 +652,7 @@ namespace FileCabinetApp
 
             if (string.IsNullOrEmpty(parameters))
             {
-                throw new ArgumentException("Parameters not write.");
+                this.PrintTable(new string[] { "id", "firstname", "lastname", "dateofbirth", "heigth", "salary", "type" }, this.GetRecords());
             }
 
             var nameString = this.WriteParamAfterSelect(param[0]);
@@ -740,8 +740,6 @@ namespace FileCabinetApp
                     case "type":
                         nameString.Add("Type");
                         break;
-                    default:
-                        throw new ArgumentException("incorrect parametr after select");
                 }
             }
 

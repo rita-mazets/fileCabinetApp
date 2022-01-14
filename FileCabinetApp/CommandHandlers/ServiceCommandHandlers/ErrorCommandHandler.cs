@@ -29,10 +29,9 @@ namespace FileCabinetApp.CommandHandlers
             this.CheckFunc(command, "create");
             this.CheckFunc(command, "delete");
             this.CheckFunc(command, "export");
-            this.CheckFunc(command, "find");
+            this.CheckFunc(command, "select");
             this.CheckFunc(command, "import");
             this.CheckFunc(command, "insert");
-            this.CheckFunc(command, "list");
             this.CheckFunc(command, "purge");
             this.CheckFunc(command, "stat");
             this.CheckFunc(command, "update");

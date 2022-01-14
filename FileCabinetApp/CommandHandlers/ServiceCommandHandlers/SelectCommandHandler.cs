@@ -31,7 +31,7 @@ namespace FileCabinetApp.CommandHandlers
                     Console.WriteLine(e.Message);
                 }
 
-                return "Success!";
+                return string.Empty;
             }
 
             return base.Handle(appComandRequest);

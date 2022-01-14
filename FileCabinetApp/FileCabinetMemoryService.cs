@@ -564,6 +564,10 @@ namespace FileCabinetApp
             }
 
             var nameString = this.WriteParamAfterSelect(param[0]);
+            if (nameString.Count == 0)
+            {
+                this.PrintTable(new string[] { "id", "firstname", "lastname", "dateofbirth", "heigth", "salary", "type" }, this.GetRecords());
+            }
 
             if (param.Length == 1)
             {
@@ -648,8 +652,6 @@ namespace FileCabinetApp
                     case "type":
                         nameString.Add("Type");
                         break;
-                    default:
-                        throw new ArgumentException("incorrect parametr after select");
                 }
             }
 
