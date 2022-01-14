@@ -32,9 +32,9 @@ namespace FileCabinetApp.CommandHandlers
 
                     this.fileCabinetService.Delete(parameters[1].ToLower(CultureInfo.CurrentCulture), parameters[3].ToLower(CultureInfo.CurrentCulture).Trim('\''));
 
-                    return "dd";
+                    return string.Empty;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     Console.WriteLine("Data is not correct");
                     return string.Empty;

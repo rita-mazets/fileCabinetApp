@@ -26,6 +26,12 @@ namespace FileCabinetApp
         public void Delete(string name, string value);
 
         /// <summary>
+        /// Creates new record and return id.
+        /// </summary>
+        /// <param name="fileCabinetRecord">Parameter to insert data.</param>
+        public void Update(string parameters);
+
+        /// <summary>
         /// Gets all records.
         /// </summary>
         /// <returns>All records.</returns>

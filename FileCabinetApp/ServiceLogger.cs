@@ -325,5 +325,29 @@ namespace FileCabinetApp
                 }
             }
         }
+
+        public void Update(string parameters)
+        {
+            using (var stream = new StreamWriter(this.fileName, true))
+            {
+                try
+                {
+                    Stopwatch stopWatch = new();
+                    var text = $"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Calling Restore(). ";
+                    stream.WriteLine(text);
+
+                    stopWatch.Start();
+                    this.service.Update(parameters);
+                    stopWatch.Stop();
+                    stream.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Update() was completed in time {stopWatch.ElapsedTicks} ticks");
+
+                    Console.WriteLine($"Restore method execution duration is {stopWatch.ElapsedTicks} ticks.");
+                }
+                catch (Exception e)
+                {
+                    stream.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Exeption: {e.Message}");
+                }
+            }
+        }
     }
 }

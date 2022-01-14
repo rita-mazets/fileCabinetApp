@@ -112,7 +112,7 @@ namespace FileCabinetApp
 
         public void Remove(int id)
         {
-            Stopwatch stopWatch = new();
+            Stopwatch stopWatch = new ();
             stopWatch.Start();
             this.service.Remove(id);
             stopWatch.Stop();
@@ -121,12 +121,21 @@ namespace FileCabinetApp
 
         public ReadOnlyCollection<FileCabinetRecord> Restore(FileCabinetServiceSnapshot snapshot)
         {
-            Stopwatch stopWatch = new();
+            Stopwatch stopWatch = new ();
             stopWatch.Start();
             var result = this.service.Restore(snapshot);
             stopWatch.Stop();
             Console.WriteLine($"Restore method execution duration is {stopWatch.ElapsedTicks} ticks.");
             return result;
+        }
+
+        public void Update(string parameters)
+        {
+            Stopwatch stopWatch = new ();
+            stopWatch.Start();
+            this.service.Update(parameters);
+            stopWatch.Stop();
+            Console.WriteLine($"Update method execution duration is {stopWatch.ElapsedTicks} ticks.");
         }
     }
 }
