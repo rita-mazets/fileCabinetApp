@@ -37,38 +37,12 @@ namespace FileCabinetApp
         /// <param name="fileCabinetRecord">Parameter to insert data.</param>
         public void Select(string parameters);
 
-        /// <summary>
-        /// Gets all records.
-        /// </summary>
-        /// <returns>All records.</returns>
-        public ReadOnlyCollection<FileCabinetRecord> GetRecords();
 
         /// <summary>
         /// Gets the number of records.
         /// </summary>
         /// <returns>Record count.</returns>
         public (int, int) GetStat();
-
-        /// <summary>
-        /// Searches in the dictionary for data by firstName and return array where FirstName is equal firstName .
-        /// </summary>
-        /// <param name="firstName">Param to search.</param>
-        /// <returns>Array where FirstName is equal firstName.</returns>
-        public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName);
-
-        /// <summary>
-        /// Searches in the dictionary for data by lastName and return array where LastName is equal lastName .
-        /// </summary>
-        /// <param name="lastName">Param to search.</param>
-        /// <returns>Array where LastName is equal lastName.</returns>
-        public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName);
-
-        /// <summary>
-        /// Searches in the dictionary for data by dateOfBirth and return array where DateOfBirth is equal dateOfBirth .
-        /// </summary>
-        /// <param name="dateOfBirth">Param to search.</param>
-        /// <returns>Array where DateOfBirth is equal dateOfBirth.</returns>
-        public ReadOnlyCollection<FileCabinetRecord> FindDateOfBirth(DateTime dateOfBirth);
 
         public ReadOnlyCollection<FileCabinetRecord> Restore(FileCabinetServiceSnapshot snapshot);
 

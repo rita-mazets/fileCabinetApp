@@ -36,45 +36,7 @@ namespace FileCabinetApp
             Console.WriteLine($"Create method execution duration is {stopWatch.ElapsedTicks} ticks.");
         }
 
-        public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
-        {
-            Stopwatch stopWatch = new();
-            stopWatch.Start();
-            var result = this.service.FindByFirstName(firstName);
-            stopWatch.Stop();
-            Console.WriteLine($"FindByFirstName method execution duration is {stopWatch.ElapsedTicks} ticks.");
-            return result;
-        }
-
-        public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName)
-        {
-            Stopwatch stopWatch = new();
-            stopWatch.Start();
-            var result = this.service.FindByLastName(lastName);
-            stopWatch.Stop();
-            Console.WriteLine($"FindByLastName method execution duration is {stopWatch.ElapsedTicks} ticks.");
-            return result;
-        }
-
-        public ReadOnlyCollection<FileCabinetRecord> FindDateOfBirth(DateTime dateOfBirth)
-        {
-            Stopwatch stopWatch = new();
-            stopWatch.Start();
-            var result =  this.service.FindDateOfBirth(dateOfBirth);
-            stopWatch.Stop();
-            Console.WriteLine($"FindDateOfBirth method execution duration is {stopWatch.ElapsedTicks} ticks.");
-            return result;
-        }
-
-        public ReadOnlyCollection<FileCabinetRecord> GetRecords()
-        {
-            Stopwatch stopWatch = new();
-            stopWatch.Start();
-            var result = this.service.GetRecords();
-            stopWatch.Stop();
-            Console.WriteLine($"GetRecords method execution duration is {stopWatch.ElapsedTicks} ticks.");
-            return result;
-        }
+       
 
         public (int, int) GetStat()
         {

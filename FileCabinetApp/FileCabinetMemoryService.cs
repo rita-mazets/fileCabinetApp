@@ -4,13 +4,11 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using ConsoleTables;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
     /// <summary>
-    /// Works with records.
+    /// Works with memoryrecords.
     /// </summary>
     public class FileCabinetMemoryService : IFileCabinetService
     {
@@ -19,6 +17,23 @@ namespace FileCabinetApp
         private readonly Dictionary<string, List<FileCabinetRecord>> firstNameDictionary = new ();
         private readonly Dictionary<string, List<FileCabinetRecord>> lastNameDictionary = new ();
         private readonly Dictionary<DateTime, List<FileCabinetRecord>> dateOfBirthDictionary = new ();
+
+        private Dictionary<string, ReadOnlyCollection<FileCabinetRecord>> firstnameOneCashe = new ();
+        private Dictionary<string, ReadOnlyCollection<FileCabinetRecord>> lastnameOneCashe = new ();
+        private Dictionary<DateTime, ReadOnlyCollection<FileCabinetRecord>> dateofbirthOneCashe = new ();
+        private Dictionary<short, ReadOnlyCollection<FileCabinetRecord>> heightOneCashe = new ();
+        private Dictionary<decimal, ReadOnlyCollection<FileCabinetRecord>> salaryOneCashe = new ();
+        private Dictionary<char, ReadOnlyCollection<FileCabinetRecord>> typeOneCashe = new ();
+
+        private Dictionary<(IEnumerable<FileCabinetRecord>, string), ReadOnlyCollection<FileCabinetRecord>> firstnameTwoCashe = new ();
+        private Dictionary<(IEnumerable<FileCabinetRecord>, string), ReadOnlyCollection<FileCabinetRecord>> lastnameTwoCashe = new ();
+        private Dictionary<(IEnumerable<FileCabinetRecord>, DateTime), ReadOnlyCollection<FileCabinetRecord>> dateofbirthTwoCashe = new ();
+        private Dictionary<(IEnumerable<FileCabinetRecord>, short), ReadOnlyCollection<FileCabinetRecord>> heightTwoCashe = new ();
+        private Dictionary<(IEnumerable<FileCabinetRecord>, decimal), ReadOnlyCollection<FileCabinetRecord>> salaryTwoCashe = new ();
+        private Dictionary<(IEnumerable<FileCabinetRecord>, char), ReadOnlyCollection<FileCabinetRecord>> typeTwoCashe = new ();
+#pragma warning disable SA1305 // Field names should not use Hungarian notation
+        private Dictionary<(IEnumerable<FileCabinetRecord>, int), ReadOnlyCollection<FileCabinetRecord>> idTwoCashe = new ();
+#pragma warning restore SA1305 // Field names should not use Hungarian notation
 
         private IRecordValidator recordValidator;
 
@@ -43,11 +58,12 @@ namespace FileCabinetApp
                 throw new ArgumentNullException(nameof(fileCabinetRecord));
             }
 
+            this.ClearCashe();
+
             this.recordValidator.ValidateParameters(fileCabinetRecord);
 
             var listItem = new FileCabinetRecord
             {
-
                 Id = fileCabinetRecord.Id == 0 ? this.list.Count + 1 : fileCabinetRecord.Id,
                 FirstName = fileCabinetRecord.FirstName, LastName = fileCabinetRecord.LastName, DateOfBirth = fileCabinetRecord.DateOfBirth, Height = fileCabinetRecord.Height, Salary = fileCabinetRecord.Salary, Type = fileCabinetRecord.Type,
             };
@@ -74,11 +90,7 @@ namespace FileCabinetApp
             this.list.Add(item);
         }
 
-        /// <summary>
-        /// Gets all records.
-        /// </summary>
-        /// <returns>All records.</returns>
-        public ReadOnlyCollection<FileCabinetRecord> GetRecords()
+        private ReadOnlyCollection<FileCabinetRecord> GetRecords()
         {
             return new ReadOnlyCollection<FileCabinetRecord>(this.list);
         }
@@ -92,10 +104,6 @@ namespace FileCabinetApp
             return (this.list.Count, 0);
         }
 
-        /// <summary>
-        /// Edits an existing record.
-        /// </summary>
-        /// <param name="fileCabinetRecord">Parameter to edit data.</param>
         private void EditRecord(FileCabinetRecord fileCabinetRecord)
         {
             if (fileCabinetRecord is null)
@@ -176,8 +184,13 @@ namespace FileCabinetApp
             return isExist;
         }
 
-        public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
+        private ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
         {
+            if (this.firstnameOneCashe.ContainsKey(firstName))
+            {
+                return this.firstnameOneCashe[firstName];
+            }
+
             if (string.IsNullOrEmpty(firstName))
             {
                 throw new ArgumentException("incorrect firstName", nameof(firstName));
@@ -190,14 +203,35 @@ namespace FileCabinetApp
                 throw new ArgumentException("firstName don't consist in dictionary", nameof(firstName));
             }
 
-            return new ReadOnlyCollection<FileCabinetRecord>(this.firstNameDictionary[firstName]);
+            var result = new ReadOnlyCollection<FileCabinetRecord>(this.firstNameDictionary[firstName]);
+            this.firstnameOneCashe.Add(firstName, result);
+            return result;
         }
 
-        public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName)
+        private ReadOnlyCollection<FileCabinetRecord> FindByFirstName(IEnumerable<FileCabinetRecord> list, string firstName)
+        {
+            if (this.firstnameTwoCashe.ContainsKey((list, firstName)))
+            {
+                return this.firstnameTwoCashe[(list, firstName)];
+            }
+
+            var result = list.Where(item => item.FirstName == firstName).ToList();
+
+            var records = new ReadOnlyCollection<FileCabinetRecord>(result);
+            this.firstnameTwoCashe.Add((list, firstName), records);
+            return records;
+        }
+
+        private ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName)
         {
             if (string.IsNullOrEmpty(lastName))
             {
                 throw new ArgumentException("incorrect lastName", nameof(lastName));
+            }
+
+            if (this.lastnameOneCashe.ContainsKey(lastName))
+            {
+                return this.lastnameOneCashe[lastName];
             }
 
             if (!this.lastNameDictionary.ContainsKey(lastName))
@@ -206,38 +240,150 @@ namespace FileCabinetApp
             }
 
             lastName = lastName.ToLower(CultureInfo.CurrentCulture);
-            return new ReadOnlyCollection<FileCabinetRecord>(this.lastNameDictionary[lastName]);
+            var result = new ReadOnlyCollection<FileCabinetRecord>(this.lastNameDictionary[lastName]);
+            this.lastnameOneCashe.Add(lastName, result);
+            return result;
         }
 
-        public ReadOnlyCollection<FileCabinetRecord> FindDateOfBirth(DateTime dateOfBirth)
+        private ReadOnlyCollection<FileCabinetRecord> FindByLastName(IEnumerable<FileCabinetRecord> list, string lastName)
+        {
+            if (this.lastnameTwoCashe.ContainsKey((list, lastName)))
+            {
+                return this.lastnameTwoCashe[(list, lastName)];
+            }
+
+            var result = list.Where(item => item.LastName == lastName).ToList();
+
+            var records = new ReadOnlyCollection<FileCabinetRecord>(result);
+            this.lastnameTwoCashe.Add((list, lastName), records);
+            return records;
+        }
+
+        private ReadOnlyCollection<FileCabinetRecord> FindDateOfBirth(DateTime dateOfBirth)
         {
             if (!this.dateOfBirthDictionary.ContainsKey(dateOfBirth))
             {
                 throw new ArgumentException("dateOfBirth don't consist in dictionary", nameof(dateOfBirth));
             }
 
-            return new ReadOnlyCollection<FileCabinetRecord>(this.dateOfBirthDictionary[dateOfBirth]);
+            if (this.dateofbirthOneCashe.ContainsKey(dateOfBirth))
+            {
+                return this.dateofbirthOneCashe[dateOfBirth];
+            }
+
+            var result = new ReadOnlyCollection<FileCabinetRecord>(this.dateOfBirthDictionary[dateOfBirth]);
+            this.dateofbirthOneCashe.Add(dateOfBirth, result);
+            return result;
         }
 
-        public static ReadOnlyCollection<FileCabinetRecord> FindByFirstName(IEnumerable<FileCabinetRecord> list, string firstName)
+        private ReadOnlyCollection<FileCabinetRecord> FindDateOfBirth(IEnumerable<FileCabinetRecord> list, DateTime dateOfBirth)
         {
-            var result = list.Where(item => item.FirstName == firstName).ToList();
+            if (this.dateofbirthTwoCashe.ContainsKey((list, dateOfBirth)))
+            {
+                return this.dateofbirthTwoCashe[(list, dateOfBirth)];
+            }
 
-            return new ReadOnlyCollection<FileCabinetRecord>(result);
-        }
-
-        private static ReadOnlyCollection<FileCabinetRecord> FindByLastName(IEnumerable<FileCabinetRecord> list, string lastName)
-        {
-            var result = list.Where(item => item.LastName == lastName).ToList();
-
-            return new ReadOnlyCollection<FileCabinetRecord>(result);
-        }
-
-        private static ReadOnlyCollection<FileCabinetRecord> FindDateOfBirth(IEnumerable<FileCabinetRecord> list,DateTime dateOfBirth)
-        {
             var result = list.Where(item => item.DateOfBirth == dateOfBirth).ToList();
 
-            return new ReadOnlyCollection<FileCabinetRecord>(result);
+            var records = new ReadOnlyCollection<FileCabinetRecord>(result);
+            this.dateofbirthTwoCashe.Add((list, dateOfBirth), records);
+            return records;
+        }
+
+        private ReadOnlyCollection<FileCabinetRecord> FindByType(char type)
+        {
+            if (this.typeOneCashe.ContainsKey(type))
+            {
+                return this.typeOneCashe[type];
+            }
+
+            var records = this.list.Where(item => item.Type == type).ToList();
+
+            var result = new ReadOnlyCollection<FileCabinetRecord>(records);
+            this.typeOneCashe.Add(type, result);
+            return result;
+        }
+
+        private ReadOnlyCollection<FileCabinetRecord> FindByType(IEnumerable<FileCabinetRecord> list, char type)
+        {
+            if (this.typeTwoCashe.ContainsKey((list, type)))
+            {
+                return this.typeTwoCashe[(list, type)];
+            }
+
+            var records = list.Where(item => item.Type == type).ToList();
+
+            var result = new ReadOnlyCollection<FileCabinetRecord>(records);
+            this.typeTwoCashe.Add((list, type), result);
+            return result;
+        }
+
+        private ReadOnlyCollection<FileCabinetRecord> FindBySalary(decimal salary)
+        {
+            if (this.salaryOneCashe.ContainsKey(salary))
+            {
+                return this.salaryOneCashe[salary];
+            }
+
+            var records = this.list.Where(item => item.Salary == salary).ToList();
+
+            var result = new ReadOnlyCollection<FileCabinetRecord>(records);
+            this.salaryOneCashe.Add(salary, result);
+            return result;
+        }
+
+        private ReadOnlyCollection<FileCabinetRecord> FindBySalary(IEnumerable<FileCabinetRecord> list, decimal salary)
+        {
+            if (this.salaryTwoCashe.ContainsKey((list, salary)))
+            {
+                return this.salaryTwoCashe[(list, salary)];
+            }
+
+            var result = list.Where(item => item.Salary == salary).ToList();
+
+            var records = new ReadOnlyCollection<FileCabinetRecord>(result);
+            this.salaryTwoCashe.Add((list, salary), records);
+            return records;
+        }
+
+        private ReadOnlyCollection<FileCabinetRecord> FindByHeight(short height)
+        {
+            if (this.heightOneCashe.ContainsKey(height))
+            {
+                return this.heightOneCashe[height];
+            }
+
+            var records = this.list.Where(item => item.Height == height).ToList();
+
+            var result = new ReadOnlyCollection<FileCabinetRecord>(records);
+            this.heightOneCashe.Add(height, result);
+            return result;
+        }
+
+        private ReadOnlyCollection<FileCabinetRecord> FindByHeight(IEnumerable<FileCabinetRecord> list, short height)
+        {
+            if (this.heightTwoCashe.ContainsKey((list, height)))
+            {
+                return this.heightTwoCashe[(list, height)];
+            }
+
+            var result = list.Where(item => item.Height == height).ToList();
+            var records = new ReadOnlyCollection<FileCabinetRecord>(result);
+            this.heightTwoCashe.Add((list, height), records);
+            return records;
+        }
+
+        private ReadOnlyCollection<FileCabinetRecord> FindById(IEnumerable<FileCabinetRecord> list, int id)
+        {
+            if (this.idTwoCashe.ContainsKey((list, id)))
+            {
+                return this.idTwoCashe[(list, id)];
+            }
+
+            var result = list.Where(item => item.Id == id).ToList();
+            var records = new ReadOnlyCollection<FileCabinetRecord>(result);
+            this.idTwoCashe.Add((list, id), records);
+            return records;
         }
 
         /// <summary>
@@ -252,6 +398,7 @@ namespace FileCabinetApp
         /// <summary>
         /// Creates snapshot.
         /// </summary>
+        /// <param name="snapshot">Parameter to restore data.</param>
         /// <returns>Snapshot.</returns>
         public ReadOnlyCollection<FileCabinetRecord> Restore(FileCabinetServiceSnapshot snapshot)
         {
@@ -299,25 +446,34 @@ namespace FileCabinetApp
             RemoveDictionary<DateTime>(this.dateOfBirthDictionary, record, record.DateOfBirth);
         }
 
-        private static void RemoveDictionary<T>(Dictionary<T, List<FileCabinetRecord>> dictionary, FileCabinetRecord record, T param)
-        {
-            if (dictionary[param].Count > 1)
-            {
-                dictionary[param].Remove(record);
-            }
-            else if (dictionary[param].Count == 1)
-            {
-                dictionary.Remove(param);
-            }
-        }
-
+        /// <summary>
+        /// Returns -1.
+        /// </summary>
+        /// <returns>-1.</returns>
         public int Purge()
         {
             return -1;
         }
 
+        /// <summary>
+        /// Deletes record.
+        /// </summary>
+        /// <param name="name">Parameter to find parameter to delete record.</param>
+        /// /// <param name="value">Parameter to delete record.</param>
         public void Delete(string name, string value)
         {
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            this.ClearCashe();
+
             switch (name)
             {
                 case "id":
@@ -344,47 +500,6 @@ namespace FileCabinetApp
             }
         }
 
-        private ReadOnlyCollection<FileCabinetRecord> FindByType(char type)
-        {
-            var result = this.list.Where(item => item.Type == type).ToList();
-
-            return new ReadOnlyCollection<FileCabinetRecord>(result);
-        }
-
-        private ReadOnlyCollection<FileCabinetRecord> FindBySalary(decimal salary)
-        {
-            var result = this.list.Where(item => item.Salary == salary).ToList();
-
-            return new ReadOnlyCollection<FileCabinetRecord>(result);
-        }
-
-        private ReadOnlyCollection<FileCabinetRecord> FindByHeight(short height)
-        {
-            var result = this.list.Where(item => item.Height == height).ToList();
-
-            return new ReadOnlyCollection<FileCabinetRecord>(result);
-        }
-
-        private static ReadOnlyCollection<FileCabinetRecord> FindByType(IEnumerable<FileCabinetRecord> list, char type)
-        {
-            var result = list.Where(item => item.Type == type).ToList();
-
-            return new ReadOnlyCollection<FileCabinetRecord>(result);
-        }
-
-        private static ReadOnlyCollection<FileCabinetRecord> FindBySalary(IEnumerable<FileCabinetRecord> list, decimal salary)
-        {
-            var result = list.Where(item => item.Salary == salary).ToList();
-
-            return new ReadOnlyCollection<FileCabinetRecord>(result);
-        }
-
-        private static ReadOnlyCollection<FileCabinetRecord> FindByHeight(IEnumerable<FileCabinetRecord> list, short height)
-        {
-            var result = list.Where(item => item.Height == height).ToList();
-            return new ReadOnlyCollection<FileCabinetRecord>(result);
-        }
-
         private void DeleteItem(ReadOnlyCollection<FileCabinetRecord> records)
         {
             if (records is null)
@@ -404,20 +519,26 @@ namespace FileCabinetApp
             }
         }
 
+        /// <summary>
+        /// Updates record.
+        /// </summary>
+        /// <param name="parameters">Parameter update record.</param>
         public void Update(string parameters)
         {
-            var param = parameters.ToLower(CultureInfo.CurrentCulture).Split("where");
+            var param = parameters?.ToLower(CultureInfo.CurrentCulture).Split("where");
 
             if (string.IsNullOrEmpty(parameters))
             {
                 throw new ArgumentException("Parameters not write.");
             }
 
+            this.ClearCashe();
+
             if (param.Length == 1)
             {
                 foreach (var item in this.list)
                 {
-                    this.WriteParamAfterSet(param[0], item);
+                    WriteParamAfterSet(param[0], item);
                 }
             }
 
@@ -427,14 +548,97 @@ namespace FileCabinetApp
 
                 foreach (var item in afterWhere)
                 {
-                    this.WriteParamAfterSet(param[0], item);
+                    WriteParamAfterSet(param[0], item);
                 }
             }
         }
 
-        private void WriteParamAfterSet(string param, FileCabinetRecord record)
+        private void ClearCashe()
         {
-            Dictionary<string, string> dict = new();
+            this.firstnameOneCashe.Clear();
+            this.firstnameTwoCashe.Clear();
+            this.lastnameOneCashe.Clear();
+            this.lastnameTwoCashe.Clear();
+            this.dateofbirthOneCashe.Clear();
+            this.dateofbirthTwoCashe.Clear();
+            this.heightOneCashe.Clear();
+            this.heightTwoCashe.Clear();
+            this.salaryOneCashe.Clear();
+            this.salaryTwoCashe.Clear();
+            this.typeOneCashe.Clear();
+            this.typeTwoCashe.Clear();
+        }
+
+        private ReadOnlyCollection<FileCabinetRecord> WriteParamAfterWhere(string param)
+        {
+            ReadOnlyCollection<FileCabinetRecord> records = new ReadOnlyCollection<FileCabinetRecord>(new List<FileCabinetRecord>());
+            string[] keyValues;
+            if (param.Contains("or"))
+            {
+                List<FileCabinetRecord> result = new ();
+                keyValues = param.Split("or", StringSplitOptions.RemoveEmptyEntries);
+
+                for (int i = 0; i < keyValues.Length; i++)
+                {
+                     result.AddRange(this.FindRecordsByParameters(this.list, keyValues[i]));
+                }
+
+                records = new ReadOnlyCollection<FileCabinetRecord>(result);
+            }
+            else
+            {
+                keyValues = param.Split("and", StringSplitOptions.RemoveEmptyEntries);
+
+                for (int i = 0; i < keyValues.Length; i++)
+                {
+                    if (i == 0)
+                    {
+                        records = this.FindRecordsByParameters(this.list, keyValues[i]);
+                    }
+                    else
+                    {
+                        records = this.FindRecordsByParameters(records, keyValues[i]);
+                    }
+                }
+            }
+
+            if (keyValues is null)
+            {
+                return null;
+            }
+
+            return records;
+        }
+
+        /// <summary>
+        /// Selects record.
+        /// </summary>
+        /// <param name="parameters">Parameter select record.</param>
+        public void Select(string parameters)
+        {
+            var param = parameters?.ToLower(CultureInfo.CurrentCulture).Split("where");
+
+            if (string.IsNullOrEmpty(parameters))
+            {
+                PrintTable(new string[] { "id", "firstname", "lastname", "dateofbirth", "heigth", "salary", "type" }, this.GetRecords());
+            }
+
+            var nameString = WriteParamAfterSelect(param[0]);
+
+            if (param.Length == 1)
+            {
+                PrintTable(nameString.ToArray(), this.list);
+            }
+
+            if (param.Length == 2)
+            {
+                var afterWhere = this.WriteParamAfterWhere(param[1]);
+                PrintTable(nameString.ToArray(), afterWhere);
+            }
+        }
+
+        private static void WriteParamAfterSet(string param, FileCabinetRecord record)
+        {
             var values = param.Split(new char[] { '=', ',' }, StringSplitOptions.RemoveEmptyEntries);
 
             if (!values[0].StartsWith("set", StringComparison.CurrentCultureIgnoreCase))
@@ -445,7 +649,6 @@ namespace FileCabinetApp
             {
                 values[0] = values[0].Replace("set ", string.Empty);
             }
-
 
             for (int i = 0; i < values.Length - 1; i += 2)
             {
@@ -476,112 +679,7 @@ namespace FileCabinetApp
             }
         }
 
-        private ReadOnlyCollection<FileCabinetRecord> WriteParamAfterWhere(string param)
-        {
-            ReadOnlyCollection<FileCabinetRecord> records = new ReadOnlyCollection<FileCabinetRecord>(new List<FileCabinetRecord>());
-            string[] keyValues;
-            if (param.Contains("or"))
-            {
-                List<FileCabinetRecord> result = new ();
-                keyValues = param.Split("or", StringSplitOptions.RemoveEmptyEntries);
-
-                for (int i = 0; i < keyValues.Length; i++)
-                {
-                     result.AddRange(FindRecordsByParameters(this.list, keyValues[i]));
-                }
-
-                records = new ReadOnlyCollection<FileCabinetRecord>(result);
-            }
-            else
-            {
-                keyValues = param.Split("and", StringSplitOptions.RemoveEmptyEntries);
-
-                for (int i = 0; i < keyValues.Length; i++)
-                {
-                    if (i == 0)
-                    {
-                        records = FindRecordsByParameters(this.list, keyValues[i]);
-                    }
-                    else
-                    {
-                        records = FindRecordsByParameters(records, keyValues[i]);
-                    }
-                }
-            }
-
-            if (keyValues is null)
-            {
-                return null;
-            }
-
-            return records;
-        }
-
-        private static ReadOnlyCollection<FileCabinetRecord> FindRecordsByParameters(IEnumerable<FileCabinetRecord> records, string keyValue)
-        {
-            ReadOnlyCollection<FileCabinetRecord> result;
-            var param = keyValue.Split("=");
-            param[0] = param[0].Trim(' ');
-            param[1] = param[1].Trim(' ');
-            switch (param[0])
-            {
-                case "id":
-                    var newresult = records.Where(i => i.Id == Convert.ToInt32(param[1].Trim('\''), CultureInfo.CurrentCulture));
-                    result = new ReadOnlyCollection<FileCabinetRecord>((IList<FileCabinetRecord>)newresult);
-                    break;
-                case "firstname":
-                    result = FindByFirstName(records, param[1].Trim('\''));
-                    break;
-                case "lastname":
-                    result = FindByLastName(records, param[1].Trim('\''));
-                    break;
-                case "dateofbirth":
-                    result = FindDateOfBirth(records, Convert.ToDateTime(param[1].Trim('\''), CultureInfo.CurrentCulture));
-                    break;
-                case "height":
-                    result = FindByHeight(records, Convert.ToInt16(param[1].Trim('\''), CultureInfo.CurrentCulture));
-                    break;
-                case "salary":
-                    result = FindBySalary(records, Convert.ToDecimal(param[1].Trim('\''), CultureInfo.CurrentCulture));
-                    break;
-                case "type":
-                    result = FindByType(records, param[1].Trim('\'')[0]);
-                    break;
-                default:
-                    throw new ArgumentException("Incorrect parametr after where");
-            }
-
-            return result;
-        }
-
-        public void Select(string parameters)
-        {
-            var param = parameters.ToLower(CultureInfo.CurrentCulture).Split("where");
-
-            if (string.IsNullOrEmpty(parameters))
-            {
-                throw new ArgumentException("Parameters not write.");
-            }
-
-            var nameString = this.WriteParamAfterSelect(param[0]);
-            if (nameString.Count == 0)
-            {
-                this.PrintTable(new string[] { "id", "firstname", "lastname", "dateofbirth", "heigth", "salary", "type" }, this.GetRecords());
-            }
-
-            if (param.Length == 1)
-            {
-                this.PrintTable(nameString.ToArray(), this.list);
-            }
-
-            if (param.Length == 2)
-            {
-                var afterWhere = this.WriteParamAfterWhere(param[1]);
-                this.PrintTable(nameString.ToArray(), afterWhere);
-            }
-        }
-
-        private void PrintTable(string[] namesString, IEnumerable<FileCabinetRecord> records)
+        private static void PrintTable(string[] namesString, IEnumerable<FileCabinetRecord> records)
         {
             var table = new ConsoleTable(namesString);
 
@@ -622,10 +720,10 @@ namespace FileCabinetApp
             table.Configure(o => o.NumberAlignment = Alignment.Right).Write(Format.Alternative);
         }
 
-        private List<string> WriteParamAfterSelect(string param)
+        private static List<string> WriteParamAfterSelect(string param)
         {
             var values = param.Split(',', StringSplitOptions.RemoveEmptyEntries);
-            List<string> nameString = new();
+            List<string> nameString = new ();
             for (int i = 0; i < values.Length; i++)
             {
                 values[i] = values[i].Trim(' ');
@@ -656,6 +754,54 @@ namespace FileCabinetApp
             }
 
             return nameString;
+        }
+
+        private static void RemoveDictionary<T>(Dictionary<T, List<FileCabinetRecord>> dictionary, FileCabinetRecord record, T param)
+        {
+            if (dictionary[param].Count > 1)
+            {
+                dictionary[param].Remove(record);
+            }
+            else if (dictionary[param].Count == 1)
+            {
+                dictionary.Remove(param);
+            }
+        }
+
+        private ReadOnlyCollection<FileCabinetRecord> FindRecordsByParameters(IEnumerable<FileCabinetRecord> records, string keyValue)
+        {
+            ReadOnlyCollection<FileCabinetRecord> result;
+            var param = keyValue.Split("=");
+            param[0] = param[0].Trim(' ');
+            param[1] = param[1].Trim(' ');
+            switch (param[0])
+            {
+                case "id":
+                    result = this.FindById(records, Convert.ToInt32(param[1].Trim('\''), CultureInfo.CurrentCulture));
+                    break;
+                case "firstname":
+                    result = this.FindByFirstName(records, param[1].Trim('\''));
+                    break;
+                case "lastname":
+                    result = this.FindByLastName(records, param[1].Trim('\''));
+                    break;
+                case "dateofbirth":
+                    result = this.FindDateOfBirth(records, Convert.ToDateTime(param[1].Trim('\''), CultureInfo.CurrentCulture));
+                    break;
+                case "height":
+                    result = this.FindByHeight(records, Convert.ToInt16(param[1].Trim('\''), CultureInfo.CurrentCulture));
+                    break;
+                case "salary":
+                    result = this.FindBySalary(records, Convert.ToDecimal(param[1].Trim('\''), CultureInfo.CurrentCulture));
+                    break;
+                case "type":
+                    result = this.FindByType(records, param[1].Trim('\'')[0]);
+                    break;
+                default:
+                    throw new ArgumentException("Incorrect parametr after where");
+            }
+
+            return result;
         }
     }
 }
