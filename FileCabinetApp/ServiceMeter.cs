@@ -27,13 +27,13 @@ namespace FileCabinetApp
             return result;
         }
 
-        public void EditRecord(FileCabinetRecord fileCabinetRecord)
+        public void Delete(string name, string value)
         {
-            Stopwatch stopWatch = new ();
+            Stopwatch stopWatch = new();
             stopWatch.Start();
-            this.service.EditRecord(fileCabinetRecord);
+            this.service.Delete(name, value);
             stopWatch.Stop();
-            Console.WriteLine($"EditRecord method execution duration is {stopWatch.ElapsedTicks} ticks.");
+            Console.WriteLine($"Create method execution duration is {stopWatch.ElapsedTicks} ticks.");
         }
 
         public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
@@ -86,6 +86,11 @@ namespace FileCabinetApp
             return result;
         }
 
+        public int Insert(FileCabinetRecord fileCabinetRecord)
+        {
+            throw new NotImplementedException();
+        }
+
         public int Purge()
         {
             Stopwatch stopWatch = new();
@@ -96,23 +101,23 @@ namespace FileCabinetApp
             return result;
         }
 
-        public void Remove(int id)
-        {
-            Stopwatch stopWatch = new();
-            stopWatch.Start();
-            this.service.Remove(id);
-            stopWatch.Stop();
-            Console.WriteLine($"Remove method execution duration is {stopWatch.ElapsedTicks} ticks.");
-        }
-
         public ReadOnlyCollection<FileCabinetRecord> Restore(FileCabinetServiceSnapshot snapshot)
         {
-            Stopwatch stopWatch = new();
+            Stopwatch stopWatch = new ();
             stopWatch.Start();
             var result = this.service.Restore(snapshot);
             stopWatch.Stop();
             Console.WriteLine($"Restore method execution duration is {stopWatch.ElapsedTicks} ticks.");
             return result;
+        }
+
+        public void Update(string parameters)
+        {
+            Stopwatch stopWatch = new ();
+            stopWatch.Start();
+            this.service.Update(parameters);
+            stopWatch.Stop();
+            Console.WriteLine($"Update method execution duration is {stopWatch.ElapsedTicks} ticks.");
         }
     }
 }

@@ -51,27 +51,23 @@ namespace FileCabinetApp
             }
         }
 
-        public void EditRecord(FileCabinetRecord fileCabinetRecord)
+        public void Delete(string name, string value)
         {
-            if (fileCabinetRecord is null)
-            {
-                throw new ArgumentNullException(nameof(fileCabinetRecord));
-            }
 
             using (var stream = new StreamWriter(this.fileName, true))
             {
                 try
                 {
-                    Stopwatch stopWatch = new ();
-                    var text = $"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Calling Edit() with FirsrName = \"{fileCabinetRecord.FirstName}\", LastName = \"{fileCabinetRecord.LastName}\", DateOfBirth = \"{fileCabinetRecord.DateOfBirth}\", Height = \"{fileCabinetRecord.Height}\", Salary = \"{fileCabinetRecord.Salary}\", Type = \"{fileCabinetRecord.Type}\". ";
+                    Stopwatch stopWatch = new();
+                    var text = $"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Calling Delete() with {name} = \'{value}\' ";
                     stream.WriteLine(text);
 
                     stopWatch.Start();
-                    this.service.EditRecord(fileCabinetRecord);
+                    this.service.Delete(name, value);
                     stopWatch.Stop();
-                    stream.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Edit() was completed in time {stopWatch.ElapsedTicks} ticks");
+                    stream.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Delete() was completed in time {stopWatch.ElapsedTicks} ticks");
 
-                    Console.WriteLine($"EditRecord method execution duration is {stopWatch.ElapsedTicks} ticks.");
+                    Console.WriteLine($"Create method execution duration is {stopWatch.ElapsedTicks} ticks.");
                 }
                 catch (Exception e)
                 {
@@ -220,6 +216,11 @@ namespace FileCabinetApp
             }
         }
 
+        public int Insert(FileCabinetRecord fileCabinetRecord)
+        {
+            throw new NotImplementedException();
+        }
+
         public int Purge()
         {
             using (var stream = new StreamWriter(this.fileName, true))
@@ -246,30 +247,6 @@ namespace FileCabinetApp
             }
         }
 
-        public void Remove(int id)
-        {
-            using (var stream = new StreamWriter(this.fileName, true))
-            {
-                try
-                {
-                    Stopwatch stopWatch = new ();
-                    var text = $"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Calling Remove() with id = \"{id}\". ";
-                    stream.WriteLine(text);
-
-                    stopWatch.Start();
-                    this.service.Remove(id);
-                    stopWatch.Stop();
-                    stream.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Purge() was completed in time {stopWatch.ElapsedTicks} ticks");
-
-                    Console.WriteLine($"Remove method execution duration is {stopWatch.ElapsedTicks} ticks.");
-                }
-                catch (Exception e)
-                {
-                    stream.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Exeption: {e.Message}");
-                }
-            }
-        }
-
         public ReadOnlyCollection<FileCabinetRecord> Restore(FileCabinetServiceSnapshot snapshot)
         {
             using (var stream = new StreamWriter(this.fileName, true))
@@ -292,6 +269,30 @@ namespace FileCabinetApp
                 {
                     stream.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Exeption: {e.Message}");
                     return null;
+                }
+            }
+        }
+
+        public void Update(string parameters)
+        {
+            using (var stream = new StreamWriter(this.fileName, true))
+            {
+                try
+                {
+                    Stopwatch stopWatch = new();
+                    var text = $"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Calling Restore(). ";
+                    stream.WriteLine(text);
+
+                    stopWatch.Start();
+                    this.service.Update(parameters);
+                    stopWatch.Stop();
+                    stream.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Update() was completed in time {stopWatch.ElapsedTicks} ticks");
+
+                    Console.WriteLine($"Restore method execution duration is {stopWatch.ElapsedTicks} ticks.");
+                }
+                catch (Exception e)
+                {
+                    stream.WriteLine($"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Exeption: {e.Message}");
                 }
             }
         }

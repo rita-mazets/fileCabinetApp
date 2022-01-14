@@ -15,11 +15,11 @@ namespace FileCabinetApp.CommandHandlers
             new string[] { "stat", "prints the amount of data in the service", "The 'stat' command print the amount of data in the service. " },
             new string[] { "create", "creates new record", "The 'create' command creates new record. " },
             new string[] { "list", "prints all records", "The 'list' command prints all records. " },
-            new string[] { "edit", "allows to edit record ", "The 'edit' command allows to edit record. " },
+            new string[] { "update", "allows to edit record ", "The 'update' command allows to edit record. " },
             new string[] { "find", "allows to find record ", "The 'find' command allows to find record. " },
             new string[] { "export", "exports to csv or xml ", "The 'export' command exports to csv or xml " },
             new string[] { "import", "import from csv or xml ", "The 'import' command import from csv or xml " },
-            new string[] { "remove", "remove from file ", "The 'remove' command delete record " },
+            new string[] { "delete", "delete from file ", "The 'delete' command delete record " },
             new string[] { "purge", "purge date ", "The 'purge' command purge data " },
         };
 

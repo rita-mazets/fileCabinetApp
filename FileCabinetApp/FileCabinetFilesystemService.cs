@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -140,7 +141,7 @@ namespace FileCabinetApp
         /// Edits an existing record.
         /// </summary>
         /// <param name="fileCabinetRecord">Parameter to edit data.</param>
-        public void EditRecord(FileCabinetRecord fileCabinetRecord)
+        private void EditRecord(FileCabinetRecord fileCabinetRecord)
         {
             if (fileCabinetRecord is null)
             {
@@ -159,19 +160,22 @@ namespace FileCabinetApp
                     byte[] recordToBytes;
                     if (fileCabinetRecord is FileRecord)
                     {
-                        recordToBytes = RecordToBytes(record, 1);
-                        removeRecords.Add(record.Id);
+                        var rec = (FileRecord)fileCabinetRecord;
+                        if (rec.IsDeleted == 0)
+                        {
+                            recordToBytes = RecordToBytes(fileCabinetRecord);
+                        }
+                        else
+                        {
+                            recordToBytes = RecordToBytes(record, 1);
+                            removeRecords.Add(record.Id);
+                        }
                     }
                     else
                     {
                         recordToBytes = RecordToBytes(fileCabinetRecord);
                     }
-                    /*record.FirstName = fileCabinetRecord.FirstName;
-                    record.LastName = fileCabinetRecord.LastName;
-                    record.DateOfBirth = fileCabinetRecord.DateOfBirth;
-                    record.Height = fileCabinetRecord.Height;
-                    record.Salary = fileCabinetRecord.Salary;
-                    record.Type = fileCabinetRecord.Type;*/
+
                     this.fileStream.Seek(offset * recordSize, SeekOrigin.Begin);
                     this.fileStream.Write(recordToBytes, 0, recordToBytes.Length);
                     break;
@@ -345,7 +349,7 @@ namespace FileCabinetApp
             return snapshot.Records;
         }
 
-        public void Remove(int id)
+        private void Remove(int id)
         {
             var record = new FileRecord { Id = id, IsDeleted = 1 };
             this.EditRecord(record);
@@ -387,6 +391,243 @@ namespace FileCabinetApp
             }
 
             return count;
+        }
+
+        public void Delete(string name, string value)
+        {
+            switch (name)
+            {
+                case "id":
+                    this.Remove(Convert.ToInt32(value, CultureInfo.CurrentCulture));
+                    break;
+                case "firstname":
+                    this.DeleteItem(this.FindByFirstName(value));
+                    break;
+                case "lastname":
+                    this.DeleteItem(this.FindByLastName(value));
+                    break;
+                case "dateofbirth":
+                    this.DeleteItem(this.FindDateOfBirth(Convert.ToDateTime(value, CultureInfo.CurrentCulture)));
+                    break;
+                case "height":
+                    this.DeleteItem(this.FindByHeight(Convert.ToInt16(value, CultureInfo.CurrentCulture)));
+                    break;
+                case "salary":
+                    this.DeleteItem(this.FindBySalary(Convert.ToDecimal(value, CultureInfo.CurrentCulture)));
+                    break;
+                case "type":
+                    this.DeleteItem(this.FindByType(value[0]));
+                    break;
+            }
+        }
+
+        public ReadOnlyCollection<FileCabinetRecord> FindByType(char type)
+        {
+            var list = this.ReturnRecordList();
+            var result = list.Where(item => item.Type == type && item.IsDeleted != 1).ToList();
+
+            List<FileCabinetRecord> cabinetList = new();
+
+            foreach (var item in result)
+            {
+                if (item.IsDeleted != 1)
+                {
+                    cabinetList.Add((FileCabinetRecord)item);
+                }
+            }
+
+            return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
+        }
+
+        public ReadOnlyCollection<FileCabinetRecord> FindBySalary(decimal salary)
+        {
+            var list = this.ReturnRecordList();
+            var result = list.Where(item => item.Salary == salary && item.IsDeleted != 1).ToList();
+
+            List<FileCabinetRecord> cabinetList = new();
+
+            foreach (var item in result)
+            {
+                if (item.IsDeleted != 1)
+                {
+                    cabinetList.Add((FileCabinetRecord)item);
+                }
+            }
+
+            return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
+        }
+
+        public ReadOnlyCollection<FileCabinetRecord> FindByHeight(short height)
+        {
+            var list = this.ReturnRecordList();
+            var result = list.Where(item => item.Height == height && item.IsDeleted != 1).ToList();
+
+            List<FileCabinetRecord> cabinetList = new();
+
+            foreach (var item in result)
+            {
+                if (item.IsDeleted != 1)
+                {
+                    cabinetList.Add((FileCabinetRecord)item);
+                }
+            }
+
+            return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
+        }
+
+        private void DeleteItem(ReadOnlyCollection<FileCabinetRecord> records)
+        {
+            if (records is null)
+            {
+                Console.WriteLine("Records with this parameter not found");
+            }
+            else
+            {
+                var text = string.Empty;
+                foreach (var record in records)
+                {
+                    this.Remove(record.Id);
+                    text += $"#{record.Id}";
+                }
+
+                Console.WriteLine($"Records with id {text} was deleted.");
+            }
+        }
+
+        public void Update(string parameters)
+        {
+            var param = parameters.ToLower(CultureInfo.CurrentCulture).Split("where");
+
+            if (string.IsNullOrEmpty(parameters))
+            {
+                throw new ArgumentException("Parameters not write.");
+            }
+
+            if (param.Length == 1)
+            {
+                foreach (var item in this.GetRecords().ToList())
+                {
+                    this.WriteParamAfterSet(param[0], item);
+                }
+            }
+
+            if (param.Length == 2)
+            {
+                var afterWhere = this.WriteParamAfterWhere(param[1]);
+
+                foreach (var item in afterWhere)
+                {
+                    this.WriteParamAfterSet(param[0], item);
+                }
+            }
+        }
+
+        private void WriteParamAfterSet(string param, FileCabinetRecord record)
+        {
+            var values = param.Split(new char[] { '=', ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (!values[0].StartsWith("set", StringComparison.CurrentCultureIgnoreCase))
+            {
+                throw new ArgumentException("Data is not correct. Input \"set\"");
+            }
+            else
+            {
+                values[0] = values[0].Replace("set ", string.Empty);
+            }
+
+
+            for (int i = 0; i < values.Length - 1; i += 2)
+            {
+                values[i] = values[i].Trim(' ');
+                switch (values[i])
+                {
+                    case "firstname":
+                        record.FirstName = values[i + 1].Contains('\'') ? values[i + 1].Trim(new char[] { '\'', ' ' }) : throw new ArgumentException("incorrect syntax after firstname");
+                        break;
+                    case "lastname":
+                        record.LastName = values[i + 1].Contains('\'') ? values[i + 1].Trim(new char[] { '\'', ' ' }) : throw new ArgumentException("incorrect syntax after lastname");
+                        break;
+                    case "dateofbirth":
+                        record.DateOfBirth = values[i + 1].Contains('\'') ? Convert.ToDateTime(values[i + 1].Trim(new char[] { '\'', ' ' }), CultureInfo.CurrentCulture) : throw new ArgumentException("incorrect syntax after dateOfBirth");
+                        break;
+                    case "heigth":
+                        record.Height = values[i + 1].Contains('\'') ? Convert.ToInt16(values[i + 1].Trim(new char[] { '\'', ' ' }), CultureInfo.CurrentCulture) : throw new ArgumentException("incorrect syntax after height");
+                        break;
+                    case "salary":
+                        record.Salary = values[i + 1].Contains('\'') ? Convert.ToDecimal(values[i + 1].Trim(new char[] { '\'', ' ' }), CultureInfo.CurrentCulture) : throw new ArgumentException("incorrect syntax after salary");
+                        break;
+                    case "type":
+                        record.Type = values[i + 1].Contains('\'') ? values[i + 1].Trim(new char[] { '\'', ' ' })[0] : throw new ArgumentException("incorrect syntax after type");
+                        break;
+                    default:
+                        throw new ArgumentException("incorrect parametr after set");
+                }
+            }
+
+
+
+            this.EditRecord(record);
+        }
+
+        private List<FileCabinetRecord> WriteParamAfterWhere(string param)
+        {
+            List<FileCabinetRecord> records = new();
+            var keyValues = param.Split("and", StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < keyValues.Length; i++)
+            {
+                if (i == 0)
+                {
+                    records = FindRecordsByParameters(this.GetRecords().ToList(), keyValues[i]);
+                }
+                else
+                {
+                    records = FindRecordsByParameters(records, keyValues[i]);
+                }
+            }
+
+            if (keyValues.Length == 0)
+            {
+                return null;
+            }
+
+            return records;
+        }
+
+
+        private static List<FileCabinetRecord> FindRecordsByParameters(List<FileCabinetRecord> records, string keyValue)
+        {
+            List<FileCabinetRecord> result = new();
+            var param = keyValue.Split("=");
+            param[0] = param[0].Trim(' ');
+            param[1] = param[1].Trim(' ');
+            switch (param[0])
+            {
+                case "id":
+                    result = records.Where(i => i.Id == Convert.ToInt32(param[1].Trim('\''), CultureInfo.CurrentCulture)).ToList();
+                    break;
+                case "firstname":
+                    result = records.Where(i => i.FirstName == param[1].Trim('\'')).ToList();
+                    break;
+                case "lastname":
+                    result = records.Where(i => i.LastName == param[1].Trim('\'')).ToList();
+                    break;
+                case "dateofbirth":
+                    result = records.Where(i => i.DateOfBirth == Convert.ToDateTime(param[1].Trim('\''), CultureInfo.CurrentCulture)).ToList();
+                    break;
+                case "height":
+                    result = records.Where(i => i.Height == Convert.ToInt16(param[1].Trim('\''), CultureInfo.CurrentCulture)).ToList();
+                    break;
+                case "salary":
+                    result = records.Where(i => i.Salary == Convert.ToDecimal(param[1].Trim('\''), CultureInfo.CurrentCulture)).ToList();
+                    break;
+                case "type":
+                    result = records.Where(i => i.Type == param[1].Trim('\'')[0]).ToList();
+                    break;
+                default:
+                    throw new ArgumentException("Incorrect parametr after where");
+            }
+
+            return result;
         }
     }
 }
