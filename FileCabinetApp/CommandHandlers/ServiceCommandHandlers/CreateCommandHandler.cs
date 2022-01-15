@@ -3,13 +3,25 @@ using FileCabinetApp.CommandHandlers.ServiceCommandHandlers;
 
 namespace FileCabinetApp.CommandHandlers
 {
-    public class CreateCommandHandler: ServiceCommandHandlerBase
+    /// <summary>
+    /// Works with Create method.
+    /// </summary>
+    public class CreateCommandHandler : ServiceCommandHandlerBase
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CreateCommandHandler"/> class.
+        /// </summary>
+        /// <param name="fileCabinetService">Parameter to initialize fileCabinetService.</param>
         public CreateCommandHandler(IFileCabinetService fileCabinetService)
             : base(fileCabinetService)
         {
         }
 
+        /// <summary>
+        /// Perform action.
+        /// </summary>
+        /// <param name="appComandRequest">Parameter to set nextHandler.</param>
+        /// <returns>If nextHandler is null return null, else Handle().</returns>
         public override object Handle(AppComandRequest appComandRequest)
         {
             if (appComandRequest is null)

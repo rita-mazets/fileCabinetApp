@@ -1,13 +1,10 @@
-﻿using ConsoleTables;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
@@ -20,7 +17,6 @@ namespace FileCabinetApp
         private IRecordValidator recordValidator;
         private static int maxNameLength = 60;
         private static int recordSize = sizeof(short) + sizeof(int) + (2 * maxNameLength) + (3 * sizeof(int)) + sizeof(short) + sizeof(decimal) + sizeof(char);
-        private static RemoveRecords removeRecords;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileCabinetFilesystemService"/> class.
@@ -31,7 +27,6 @@ namespace FileCabinetApp
         {
             this.fileStream = fileStream;
             this.recordValidator = recordValidator;
-            removeRecords = new ();
         }
 
         /// <summary>
@@ -169,7 +164,6 @@ namespace FileCabinetApp
                         else
                         {
                             recordToBytes = RecordToBytes(record, 1);
-                            removeRecords.Add(record.Id);
                         }
                     }
                     else
@@ -186,17 +180,12 @@ namespace FileCabinetApp
             }
         }
 
-        /// <summary>
-        /// Searches in the dictionary for data by firstName and return array where FirstName is equal firstName .
-        /// </summary>
-        /// <param name="firstName">Param to search.</param>
-        /// <returns>Array where FirstName is equal firstName.</returns>
-        public ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
+        private ReadOnlyCollection<FileCabinetRecord> FindByFirstName(string firstName)
         {
             var list = this.ReturnRecordList();
             var result = list.Where(item => item.FirstName == firstName && item.IsDeleted != 1).ToList();
 
-            List<FileCabinetRecord> cabinetList = new();
+            List<FileCabinetRecord> cabinetList = new ();
 
             foreach (var item in result)
             {
@@ -209,7 +198,7 @@ namespace FileCabinetApp
             return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
         }
 
-        public ReadOnlyCollection<FileRecord> FindByIsDeleted()
+        private ReadOnlyCollection<FileRecord> FindByIsDeleted()
         {
             var list = this.ReturnRecordList();
             var result = list.Where(item => item.IsDeleted == 1).ToList();
@@ -217,16 +206,11 @@ namespace FileCabinetApp
             return new ReadOnlyCollection<FileRecord>(result);
         }
 
-        /// <summary>
-        /// Searches in the dictionary for data by lastName and return array where LastName is equal lastName .
-        /// </summary>
-        /// <param name="lastName">Param to search.</param>
-        /// <returns>Array where LastName is equal lastName.</returns>
-        public ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName)
+        private ReadOnlyCollection<FileCabinetRecord> FindByLastName(string lastName)
         {
             var list = this.ReturnRecordList();
             var result = list.Where(item => item.LastName == lastName && item.IsDeleted != 1).ToList();
-            List<FileCabinetRecord> cabinetList = new();
+            List<FileCabinetRecord> cabinetList = new ();
 
             foreach (var item in result)
             {
@@ -239,16 +223,11 @@ namespace FileCabinetApp
             return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
         }
 
-        /// <summary>
-        /// Searches in the dictionary for data by dateOfBirth and return array where DateOfBirth is equal dateOfBirth .
-        /// </summary>
-        /// <param name="dateOfBirth">Param to search.</param>
-        /// <returns>Array where DateOfBirth is equal dateOfBirth.</returns>
-        public ReadOnlyCollection<FileCabinetRecord> FindDateOfBirth(DateTime dateOfBirth)
+        private ReadOnlyCollection<FileCabinetRecord> FindDateOfBirth(DateTime dateOfBirth)
         {
             var list = this.ReturnRecordList();
             var result = list.Where(item => item.DateOfBirth == dateOfBirth && item.IsDeleted != 1).ToList();
-            List<FileCabinetRecord> cabinetList = new();
+            List<FileCabinetRecord> cabinetList = new ();
 
             foreach (var item in result)
             {
@@ -269,11 +248,7 @@ namespace FileCabinetApp
             return result;
         }
 
-        /// <summary>
-        /// Gets all records.
-        /// </summary>
-        /// <returns>All records.</returns>
-        public ReadOnlyCollection<FileCabinetRecord> GetRecords()
+        private ReadOnlyCollection<FileCabinetRecord> GetRecords()
         {
             var list = this.ReturnRecordList();
 
@@ -317,6 +292,7 @@ namespace FileCabinetApp
         /// <summary>
         /// Creates snapshot.
         /// </summary>
+        /// /// <param name="snapshot">Parameter to restore.</param>
         /// <returns>Snapshot.</returns>
         public ReadOnlyCollection<FileCabinetRecord> Restore(FileCabinetServiceSnapshot snapshot)
         {
@@ -356,6 +332,10 @@ namespace FileCabinetApp
             this.EditRecord(record);
         }
 
+        /// <summary>
+        /// purge record in file.
+        /// </summary>
+        /// <returns>Count of perged records.</returns>
         public int Purge()
         {
             var count = this.WriteInNewFile();
@@ -394,8 +374,23 @@ namespace FileCabinetApp
             return count;
         }
 
+        /// <summary>
+        /// Delete records.
+        /// </summary>
+        /// <param name="name">Parameter to serch records to delete.</param>
+        /// <param name="value">Value to serch records to delete.</param>
         public void Delete(string name, string value)
         {
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
             switch (name)
             {
                 case "id":
@@ -422,12 +417,12 @@ namespace FileCabinetApp
             }
         }
 
-        public ReadOnlyCollection<FileCabinetRecord> FindByType(char type)
+        private ReadOnlyCollection<FileCabinetRecord> FindByType(char type)
         {
             var list = this.ReturnRecordList();
             var result = list.Where(item => item.Type == type && item.IsDeleted != 1).ToList();
 
-            List<FileCabinetRecord> cabinetList = new();
+            List<FileCabinetRecord> cabinetList = new ();
 
             foreach (var item in result)
             {
@@ -440,12 +435,12 @@ namespace FileCabinetApp
             return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
         }
 
-        public ReadOnlyCollection<FileCabinetRecord> FindBySalary(decimal salary)
+        private ReadOnlyCollection<FileCabinetRecord> FindBySalary(decimal salary)
         {
             var list = this.ReturnRecordList();
             var result = list.Where(item => item.Salary == salary && item.IsDeleted != 1).ToList();
 
-            List<FileCabinetRecord> cabinetList = new();
+            List<FileCabinetRecord> cabinetList = new ();
 
             foreach (var item in result)
             {
@@ -458,12 +453,12 @@ namespace FileCabinetApp
             return new ReadOnlyCollection<FileCabinetRecord>(cabinetList);
         }
 
-        public ReadOnlyCollection<FileCabinetRecord> FindByHeight(short height)
+        private ReadOnlyCollection<FileCabinetRecord> FindByHeight(short height)
         {
             var list = this.ReturnRecordList();
             var result = list.Where(item => item.Height == height && item.IsDeleted != 1).ToList();
 
-            List<FileCabinetRecord> cabinetList = new();
+            List<FileCabinetRecord> cabinetList = new ();
 
             foreach (var item in result)
             {
@@ -495,8 +490,17 @@ namespace FileCabinetApp
             }
         }
 
+        /// <summary>
+        /// Updates records.
+        /// </summary>
+        /// <param name="parameters">Parameter to serch records to update.</param>
         public void Update(string parameters)
         {
+            if (parameters is null)
+            {
+                throw new ArgumentNullException(nameof(parameters));
+            }
+
             var param = parameters.ToLower(CultureInfo.CurrentCulture).Split("where");
 
             if (string.IsNullOrEmpty(parameters))
@@ -508,111 +512,24 @@ namespace FileCabinetApp
             {
                 foreach (var item in this.GetRecords().ToList())
                 {
-                    this.WriteParamAfterSet(param[0], item);
+                    ConvertFunctionString.WriteParamAfterSet(param[0], item, this.EditRecord);
                 }
             }
 
             if (param.Length == 2)
             {
-                var afterWhere = this.WriteParamAfterWhere(param[1]);
+                var afterWhere = ConvertFunctionString.WriteParamAfterWhere(param[1], FindRecordsByParameters, this.GetRecords());
 
                 foreach (var item in afterWhere)
                 {
-                    this.WriteParamAfterSet(param[0], item);
+                    ConvertFunctionString.WriteParamAfterSet(param[0], item, this.EditRecord);
                 }
             }
         }
-
-        private void WriteParamAfterSet(string param, FileCabinetRecord record)
-        {
-            var values = param.Split(new char[] { '=', ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-            if (!values[0].StartsWith("set", StringComparison.CurrentCultureIgnoreCase))
-            {
-                throw new ArgumentException("Data is not correct. Input \"set\"");
-            }
-            else
-            {
-                values[0] = values[0].Replace("set ", string.Empty);
-            }
-
-
-            for (int i = 0; i < values.Length - 1; i += 2)
-            {
-                values[i] = values[i].Trim(' ');
-                switch (values[i])
-                {
-                    case "firstname":
-                        record.FirstName = values[i + 1].Contains('\'') ? values[i + 1].Trim(new char[] { '\'', ' ' }) : throw new ArgumentException("incorrect syntax after firstname");
-                        break;
-                    case "lastname":
-                        record.LastName = values[i + 1].Contains('\'') ? values[i + 1].Trim(new char[] { '\'', ' ' }) : throw new ArgumentException("incorrect syntax after lastname");
-                        break;
-                    case "dateofbirth":
-                        record.DateOfBirth = values[i + 1].Contains('\'') ? Convert.ToDateTime(values[i + 1].Trim(new char[] { '\'', ' ' }), CultureInfo.CurrentCulture) : throw new ArgumentException("incorrect syntax after dateOfBirth");
-                        break;
-                    case "heigth":
-                        record.Height = values[i + 1].Contains('\'') ? Convert.ToInt16(values[i + 1].Trim(new char[] { '\'', ' ' }), CultureInfo.CurrentCulture) : throw new ArgumentException("incorrect syntax after height");
-                        break;
-                    case "salary":
-                        record.Salary = values[i + 1].Contains('\'') ? Convert.ToDecimal(values[i + 1].Trim(new char[] { '\'', ' ' }), CultureInfo.CurrentCulture) : throw new ArgumentException("incorrect syntax after salary");
-                        break;
-                    case "type":
-                        record.Type = values[i + 1].Contains('\'') ? values[i + 1].Trim(new char[] { '\'', ' ' })[0] : throw new ArgumentException("incorrect syntax after type");
-                        break;
-                    default:
-                        throw new ArgumentException("incorrect parametr after set");
-                }
-            }
-
-            this.EditRecord(record);
-        }
-
-        private ReadOnlyCollection<FileCabinetRecord> WriteParamAfterWhere(string param)
-        {
-            ReadOnlyCollection<FileCabinetRecord> records = new ReadOnlyCollection<FileCabinetRecord>(new List<FileCabinetRecord>());
-            string[] keyValues;
-            if (param.Contains("or"))
-            {
-                List<FileCabinetRecord> result = new();
-                keyValues = param.Split("or", StringSplitOptions.RemoveEmptyEntries);
-
-                for (int i = 0; i < keyValues.Length; i++)
-                {
-                    result.AddRange(FindRecordsByParameters(this.GetRecords(), keyValues[i]));
-                }
-
-                records = new ReadOnlyCollection<FileCabinetRecord>(result);
-            }
-            else
-            {
-                keyValues = param.Split("and", StringSplitOptions.RemoveEmptyEntries);
-
-                for (int i = 0; i < keyValues.Length; i++)
-                {
-                    if (i == 0)
-                    {
-                        records = FindRecordsByParameters(this.GetRecords(), keyValues[i]);
-                    }
-                    else
-                    {
-                        records = FindRecordsByParameters(records, keyValues[i]);
-                    }
-                }
-            }
-
-            if (keyValues is null)
-            {
-                return null;
-            }
-
-            return records;
-        }
-
 
         private static ReadOnlyCollection<FileCabinetRecord> FindRecordsByParameters(IEnumerable<FileCabinetRecord> records, string keyValue)
         {
-            List<FileCabinetRecord> result = new();
+            List<FileCabinetRecord> result = new ();
             var param = keyValue.Split("=");
             param[0] = param[0].Trim(' ');
             param[1] = param[1].Trim(' ');
@@ -646,104 +563,41 @@ namespace FileCabinetApp
             return new ReadOnlyCollection<FileCabinetRecord>(result);
         }
 
+        /// <summary>
+        /// Selects records.
+        /// </summary>
+        /// <param name="parameters">Parameter to serch records to select.</param>
         public void Select(string parameters)
         {
-            var param = parameters.ToLower(CultureInfo.CurrentCulture).Split("where");
+            var param = parameters?.ToLower(CultureInfo.CurrentCulture).Split("where");
 
             if (string.IsNullOrEmpty(parameters))
             {
-                this.PrintTable(new string[] { "id", "firstname", "lastname", "dateofbirth", "heigth", "salary", "type" }, this.GetRecords());
+                DefaultRecordPrinter.PrintTable(new string[] { "id", "firstname", "lastname", "dateofbirth", "heigth", "salary", "type" }, this.GetRecords());
             }
 
-            var nameString = this.WriteParamAfterSelect(param[0]);
+            var nameString = ConvertFunctionString.WriteParamAfterSelect(param[0]);
 
             if (param.Length == 1)
             {
-                this.PrintTable(nameString.ToArray(), this.GetRecords());
+                DefaultRecordPrinter.PrintTable(nameString.ToArray(), this.GetRecords());
             }
 
             if (param.Length == 2)
             {
-                var afterWhere = this.WriteParamAfterWhere(param[1]);
-                this.PrintTable(nameString.ToArray(), afterWhere);
+                var afterWhere = ConvertFunctionString.WriteParamAfterWhere(param[1], FindRecordsByParameters, this.GetRecords());
+                DefaultRecordPrinter.PrintTable(nameString.ToArray(), afterWhere);
             }
         }
 
-        private void PrintTable(string[] namesString, IEnumerable<FileCabinetRecord> records)
+        /// <summary>
+        /// Insert records.
+        /// </summary>
+        /// <param name="fileCabinetRecord">Parameter to insert record.</param>
+        /// <returns>Id record.</returns>
+        public int Insert(FileCabinetRecord fileCabinetRecord)
         {
-            var table = new ConsoleTable(namesString);
-
-            foreach (var record in records)
-            {
-                List<object> values = new List<object>();
-                foreach (var item in namesString)
-                {
-                    switch (item.ToLower(CultureInfo.CurrentCulture))
-                    {
-                        case "id":
-                            values.Add(record.Id);
-                            break;
-                        case "firstname":
-                            values.Add(record.FirstName);
-                            break;
-                        case "lastname":
-                            values.Add(record.LastName);
-                            break;
-                        case "dateofbirth":
-                            values.Add(record.DateOfBirth.ToString("dd/MM/yyyy", CultureInfo.CurrentCulture));
-                            break;
-                        case "heigth":
-                            values.Add(record.Height);
-                            break;
-                        case "salary":
-                            values.Add(record.Salary);
-                            break;
-                        case "type":
-                            values.Add(record.Type);
-                            break;
-                    }
-                }
-
-                table.AddRow(values.ToArray());
-            }
-
-            table.Configure(o => o.NumberAlignment = Alignment.Right).Write(Format.Alternative);
-        }
-
-        private List<string> WriteParamAfterSelect(string param)
-        {
-            var values = param.Split(',', StringSplitOptions.RemoveEmptyEntries);
-            List<string> nameString = new();
-            for (int i = 0; i < values.Length; i++)
-            {
-                values[i] = values[i].Trim(' ');
-                switch (values[i])
-                {
-                    case "id":
-                        nameString.Add("Id");
-                        break;
-                    case "firstname":
-                        nameString.Add("FirstName");
-                        break;
-                    case "lastname":
-                        nameString.Add("LastName");
-                        break;
-                    case "dateofbirth":
-                        nameString.Add("DateOfBirth");
-                        break;
-                    case "heigth":
-                        nameString.Add("Heigth");
-                        break;
-                    case "salary":
-                        nameString.Add("Salary");
-                        break;
-                    case "type":
-                        nameString.Add("Type");
-                        break;
-                }
-            }
-
-            return nameString;
+            return this.CreateRecord(fileCabinetRecord);
         }
     }
 }

@@ -1,16 +1,16 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
-using System.Xml;
 using System.Xml.Serialization;
 using FileCabinetApp;
 
 namespace FileCabinetGenerator
 {
-    class Program
+    /// <summary>
+    /// Starting class.
+    /// </summary>
+    public class Program
     {
         private static string outputType;
         private static string output;
@@ -18,7 +18,11 @@ namespace FileCabinetGenerator
         private static string startId;
         private static Records records = new Records();
 
-        static void Main(string[] args)
+        /// <summary>
+        /// The main program method.
+        /// </summary>
+        /// <param name="args">Sets command line parameters.</param>
+        public static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
             (outputType, output, recordAmount, startId) = ParseArgs(args);
@@ -211,13 +215,5 @@ namespace FileCabinetGenerator
                 Console.WriteLine($"Export failed: can't open file {output}.");
             }
         }
-    }
-
-    [XmlRoot("records")]
-    public class Records
-    {
-        [XmlArray("record")]
-        public List<FileCabinetRecord> RecordList = new ();
-
     }
 }

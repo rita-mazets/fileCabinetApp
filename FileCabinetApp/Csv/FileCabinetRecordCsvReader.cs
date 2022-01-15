@@ -4,20 +4,21 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Serialization;
 
 namespace FileCabinetApp
 {
-    public class FileCabinetRecordXmlReader
+    /// <summary>
+    /// Reades list ti csv file class.
+    /// </summary>
+    public class FileCabinetRecordCsvReader
     {
-        private FileStream reader;
+        private StreamReader reader;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FileCabinetRecordXmlReader"/> class.
+        /// Initializes a new instance of the <see cref="FileCabinetRecordCsvReader"/> class.
         /// </summary>
         /// <param name="reader">Parameter to initialize reader.</param>
-        public FileCabinetRecordXmlReader(FileStream reader)
+        public FileCabinetRecordCsvReader(StreamReader reader)
         {
             this.reader = reader;
         }
@@ -25,14 +26,26 @@ namespace FileCabinetApp
         /// <summary>
         /// Write records to file.
         /// </summary>
+        /// <returns>All records from file.</returns>
         public IList<FileCabinetRecord> ReadAll()
         {
-            this.reader.Seek(0, SeekOrigin.Begin);
-            XmlSerializer formatter = new XmlSerializer(typeof(Records));
-            Records records = (Records)formatter.Deserialize(this.reader);
-            return (IList<FileCabinetRecord>)records.RecordList;
+            List<FileCabinetRecord> records = new ();
 
+            string line;
+            this.reader.ReadLine();
+            while ((line = this.reader.ReadLine()) != null)
+            {
+                try
+                {
+                    records.Add(PareString(line));
+                }
+                catch (ArgumentException)
+                {
+                    continue;
+                }
+            }
 
+            return records;
         }
 
         private static FileCabinetRecord PareString(string line)

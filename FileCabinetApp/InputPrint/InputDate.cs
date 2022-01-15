@@ -6,8 +6,15 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Works with input date.
+    /// </summary>
     public static class InputDate
     {
+        /// <summary>
+        /// Reads input date.
+        /// </summary>
+        /// <returns>date converted ti FileCabinetRecord.</returns>
         public static FileCabinetRecord Input()
         {
             string firstName, lastName;

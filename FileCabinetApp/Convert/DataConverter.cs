@@ -1,18 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Works with convert.
+    /// </summary>
     public static class DataConverter
     {
+        /// <summary>
+        /// Converts string to string.
+        /// </summary>
+        /// <param name="str">Parameter to convert string to string.</param>
+        /// <returns>Record (possible to convert, string, convert to string value).</returns>
         public static (bool, string, string) StringConverter(string str)
         {
             return (true, str, str);
         }
 
+        /// <summary>
+        /// Converts string to DateTime.
+        /// </summary>
+        /// <param name="str">Parameter to convert string to DateTime.</param>
+        /// <returns>Record (possible to convert, string, convert to DateTime value).</returns>
         public static (bool, string, DateTime) DateConverter(string str)
         {
             DateTime value;
@@ -26,6 +35,11 @@ namespace FileCabinetApp
             }
         }
 
+        /// <summary>
+        /// Converts string to Short.
+        /// </summary>
+        /// <param name="str">Parameter to convert string to short.</param>
+        /// <returns>Record (possible to convert, string, convert to short value).</returns>
         public static (bool, string, short) ShortConverter(string str)
         {
             short value;
@@ -39,6 +53,11 @@ namespace FileCabinetApp
             }
         }
 
+        /// <summary>
+        /// Converts string to decimal.
+        /// </summary>
+        /// <param name="str">Parameter to convert string to decimal.</param>
+        /// <returns>Record (possible to convert, string, convert to decimal value).</returns>
         public static (bool, string, decimal) DecimalConverter(string str)
         {
             decimal value;
@@ -52,6 +71,11 @@ namespace FileCabinetApp
             }
         }
 
+        /// <summary>
+        /// Converts string to char.
+        /// </summary>
+        /// <param name="str">Parameter to convert string to char.</param>
+        /// <returns>Record (possible to convert, string,  convert to char value).</returns>
         public static (bool, string, char) CharConverter(string str)
         {
             if (string.IsNullOrEmpty(str))

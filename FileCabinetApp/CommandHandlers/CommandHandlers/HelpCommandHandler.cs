@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp.CommandHandlers
 {
+    /// <summary>
+    /// Works with Help method.
+    /// </summary>
     public class HelpCommandHandler : CommandHandlerBase
     {
         private static string[][] helpMessages = new string[][]
@@ -22,10 +25,17 @@ namespace FileCabinetApp.CommandHandlers
             new string[] { "purge", "purge date ", "The 'purge' command purge data " },
         };
 
+#pragma warning disable SA1203 // Constants should appear before fields
         private const int CommandHelpIndex = 0;
+#pragma warning restore SA1203 // Constants should appear before fields
         private const int DescriptionHelpIndex = 1;
         private const int ExplanationHelpIndex = 2;
 
+        /// <summary>
+        /// Perform action.
+        /// </summary>
+        /// <param name="appComandRequest">Parameter to set nextHandler.</param>
+        /// <returns>If nextHandler is null return null, else Handle().</returns>
         public override object Handle(AppComandRequest appComandRequest)
         {
             if (appComandRequest is null)

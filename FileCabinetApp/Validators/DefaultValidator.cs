@@ -10,6 +10,10 @@ namespace FileCabinetApp
     /// </summary>
     public class DefaultValidator : CompositeValidator, IRecordValidator
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultValidator"/> class.
+        /// </summary>
+        /// <param name="param">Parameter to validate date.</param>
         public DefaultValidator(ValidateParam param)
             : base(new IRecordValidator[]
             {

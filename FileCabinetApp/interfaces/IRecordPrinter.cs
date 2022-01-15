@@ -1,13 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace FileCabinetApp.interfaces
+namespace FileCabinetApp
 {
+    /// <summary>
+    /// Printer interface.
+    /// </summary>
     public interface IRecordPrinter
     {
+        /// <summary>
+        /// Prints records.
+        /// </summary>
+        /// <param name="records">Parameter to print.</param>
+        /// <returns>string.</returns>
         public string Print(IEnumerable<FileCabinetRecord> records);
     }
 }

@@ -10,16 +10,28 @@ using System.Threading.Tasks;
 
 namespace FileCabinetApp
 {
+    /// <summary>
+    /// Logs information to file.
+    /// </summary>
     public class ServiceLogger : IFileCabinetService
     {
         private IFileCabinetService service;
         private string fileName = "log.txt";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceLogger"/> class.
+        /// </summary>
+        /// <param name="service">Parameter to initialize service.</param>
         public ServiceLogger(IFileCabinetService service)
         {
             this.service = service;
         }
 
+        /// <summary>
+        /// Creates new record and return id.
+        /// </summary>
+        /// <param name="fileCabinetRecord">Parameter to insert data.</param>
+        /// <returns>Record id.</returns>
         public int CreateRecord(FileCabinetRecord fileCabinetRecord)
         {
             if (fileCabinetRecord is null)
@@ -51,14 +63,18 @@ namespace FileCabinetApp
             }
         }
 
+        /// <summary>
+        /// Deletes record.
+        /// </summary>
+        /// <param name="name">Parameter to find parameter to delete record.</param>
+        /// <param name="value">Parameter to delete record.</param>
         public void Delete(string name, string value)
         {
-
             using (var stream = new StreamWriter(this.fileName, true))
             {
                 try
                 {
-                    Stopwatch stopWatch = new();
+                    Stopwatch stopWatch = new ();
                     var text = $"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Calling Delete() with {name} = \'{value}\' ";
                     stream.WriteLine(text);
 
@@ -76,7 +92,10 @@ namespace FileCabinetApp
             }
         }
 
-        
+        /// <summary>
+        /// Gets the number of records.
+        /// </summary>
+        /// <returns>Record count.</returns>
         public (int, int) GetStat()
         {
             using (var stream = new StreamWriter(this.fileName, true))
@@ -103,11 +122,20 @@ namespace FileCabinetApp
             }
         }
 
+        /// <summary>
+        /// Inserts new record and return id.
+        /// </summary>
+        /// <param name="fileCabinetRecord">Parameter to insert data.</param>
+        /// <returns>Record id.</returns>
         public int Insert(FileCabinetRecord fileCabinetRecord)
         {
-            throw new NotImplementedException();
+            return this.CreateRecord(fileCabinetRecord);
         }
 
+        /// <summary>
+        /// Purges file from deleted records.
+        /// </summary>
+        /// <returns>Result of action.</returns>
         public int Purge()
         {
             using (var stream = new StreamWriter(this.fileName, true))
@@ -134,6 +162,11 @@ namespace FileCabinetApp
             }
         }
 
+        /// <summary>
+        /// Creates snapshot.
+        /// </summary>
+        /// <param name="snapshot">Parameter to restore data.</param>
+        /// <returns>Snapshot.</returns>
         public ReadOnlyCollection<FileCabinetRecord> Restore(FileCabinetServiceSnapshot snapshot)
         {
             using (var stream = new StreamWriter(this.fileName, true))
@@ -160,13 +193,17 @@ namespace FileCabinetApp
             }
         }
 
+        /// <summary>
+        /// Selects record.
+        /// </summary>
+        /// <param name="parameters">Parameter select record.</param>
         public void Select(string parameters)
         {
             using (var stream = new StreamWriter(this.fileName, true))
             {
                 try
                 {
-                    Stopwatch stopWatch = new();
+                    Stopwatch stopWatch = new ();
                     var text = $"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Calling Restore(). ";
                     stream.WriteLine(text);
 
@@ -184,13 +221,17 @@ namespace FileCabinetApp
             }
         }
 
+        /// <summary>
+        /// Updates record.
+        /// </summary>
+        /// <param name="parameters">Parameter update record.</param>
         public void Update(string parameters)
         {
             using (var stream = new StreamWriter(this.fileName, true))
             {
                 try
                 {
-                    Stopwatch stopWatch = new();
+                    Stopwatch stopWatch = new ();
                     var text = $"{DateTime.Now:dd/MM/yyyy hh:mm:ss} Calling Restore(). ";
                     stream.WriteLine(text);
 

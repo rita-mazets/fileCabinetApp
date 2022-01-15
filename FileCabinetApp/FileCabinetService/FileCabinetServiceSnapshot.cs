@@ -15,9 +15,20 @@ namespace FileCabinetApp
     public class FileCabinetServiceSnapshot
     {
         private List<FileCabinetRecord> list;
-        public ReadOnlyCollection<FileCabinetRecord> Records { get { return new ReadOnlyCollection<FileCabinetRecord>(this.list); } }
 
-        
+        /// <summary>
+        /// Gets initializes a new instance of the <see cref="FileCabinetServiceSnapshot"/> class.
+        /// </summary>
+        /// <value>
+        /// Initializes a new instance of the <see cref="FileCabinetServiceSnapshot"/> class.
+        /// </value>
+        public ReadOnlyCollection<FileCabinetRecord> Records
+        {
+            get
+            {
+                return new ReadOnlyCollection<FileCabinetRecord>(this.list);
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileCabinetServiceSnapshot"/> class.
@@ -36,9 +47,9 @@ namespace FileCabinetApp
         }
 
         /// <summary>
-        /// Saves date do file.
+        /// Saves date to csv file.
         /// </summary>
-        /// <param name="streamWriter">Param to write.</param>
+        /// <param name="streamWriter">Stream to write.</param>
         public void SaveToCsv(StreamWriter streamWriter)
         {
             var csvWriter = new FileCabinetRecordCsvWriter(streamWriter);
@@ -46,21 +57,29 @@ namespace FileCabinetApp
         }
 
         /// <summary>
-        /// Saves date do file.
+        /// Saves date to xml file.
         /// </summary>
-        /// <param name="writer">Param to write.</param>
+        /// <param name="writer">Stream to write.</param>
         public void SaveToXml(XmlWriter writer)
         {
             var xmlWriter = new FileCabinetRecordXmlWriter(writer);
             xmlWriter.Write(this.list);
         }
 
+        /// <summary>
+        /// Loads date from csv file.
+        /// </summary>
+        /// <param name="stramReader">Stream to read.</param>
         public void LoadFromCsvFile(StreamReader stramReader)
         {
             var reader = new FileCabinetRecordCsvReader(stramReader);
             this.list = (List<FileCabinetRecord>)reader.ReadAll();
         }
 
+        /// <summary>
+        /// Loads date from xml file.
+        /// </summary>
+        /// <param name="srteam">Stream to read.</param>
         public void LoadFromXmlFile(FileStream srteam)
         {
             var reader = new FileCabinetRecordXmlReader(srteam);

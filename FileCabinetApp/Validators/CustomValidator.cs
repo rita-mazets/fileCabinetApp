@@ -1,7 +1,4 @@
-﻿using System;
-using System.Globalization;
-using FileCabinetApp.Validators;
-using Microsoft.Extensions.Configuration;
+﻿using FileCabinetApp.Validators;
 
 namespace FileCabinetApp
 {
@@ -10,6 +7,10 @@ namespace FileCabinetApp
     /// </summary>
     public class CustomValidator : CompositeValidator, IRecordValidator
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CustomValidator"/> class.
+        /// </summary>
+        /// <param name="param">Parameter to validate date.</param>
         public CustomValidator(ValidateParam param)
             : base(new IRecordValidator[]
             {
