@@ -7,13 +7,25 @@ using FileCabinetApp.CommandHandlers.ServiceCommandHandlers;
 
 namespace FileCabinetApp.CommandHandlers
 {
+    /// <summary>
+    /// Works with Error method.
+    /// </summary>
     public class ErrorCommandHandler : ServiceCommandHandlerBase
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ErrorCommandHandler"/> class.
+        /// </summary>
+        /// <param name="fileCabinetService">Parameter to initialize fileCabinetService.</param>
         public ErrorCommandHandler(IFileCabinetService fileCabinetService)
             : base(fileCabinetService)
         {
         }
 
+        /// <summary>
+        /// Perform action.
+        /// </summary>
+        /// <param name="appComandRequest">Parameter to set nextHandler.</param>
+        /// <returns>If nextHandler is null return null, else Handle().</returns>
         public override object Handle(AppComandRequest appComandRequest)
         {
             if (appComandRequest is null)
@@ -53,7 +65,7 @@ namespace FileCabinetApp.CommandHandlers
 
             foreach (var word in Substrings(answer))
             {
-                if (command == word)
+                if (command.Contains(word))
                 {
                     result = answer;
                     break;

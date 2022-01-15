@@ -2,6 +2,9 @@
 
 namespace FileCabinetApp.Validators
 {
+    /// <summary>
+    /// Validates type.
+    /// </summary>
     public class TypeValidator : IRecordValidator
     {
         /// <summary>

@@ -2,10 +2,17 @@
 
 namespace FileCabinetApp.Validators
 {
+    /// <summary>
+    /// Validates salary.
+    /// </summary>
     public class SalaryValidator : IRecordValidator
     {
         private int min;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SalaryValidator"/> class.
+        /// </summary>
+        /// <param name="min">Parameter to initialize min param.</param>
         public SalaryValidator(int min)
         {
             this.min = min;

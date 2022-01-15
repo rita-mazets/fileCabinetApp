@@ -3,20 +3,32 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using FileCabinetApp.CommandHandlers.ServiceCommandHandlers;
-using FileCabinetApp.interfaces;
 
 namespace FileCabinetApp.CommandHandlers
 {
+    /// <summary>
+    /// Works with Import method.
+    /// </summary>
     public class ImportCommandHandler : ServiceCommandHandlerBase
     {
         private IRecordPrinter printer;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImportCommandHandler"/> class.
+        /// </summary>
+        /// <param name="fileCabinetService">Parameter to initialize fileCabinetService.</param>
+        /// <param name="printer">Parameter to initialize printer.</param>
         public ImportCommandHandler(IFileCabinetService fileCabinetService, IRecordPrinter printer)
             : base(fileCabinetService)
         {
             this.printer = printer;
         }
 
+        /// <summary>
+        /// Perform action.
+        /// </summary>
+        /// <param name="appComandRequest">Parameter to set nextHandler.</param>
+        /// <returns>If nextHandler is null return null, else Handle().</returns>
         public override object Handle(AppComandRequest appComandRequest)
         {
             if (appComandRequest is null)

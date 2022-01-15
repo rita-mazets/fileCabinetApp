@@ -6,13 +6,25 @@ using FileCabinetApp.CommandHandlers.ServiceCommandHandlers;
 
 namespace FileCabinetApp.CommandHandlers
 {
+    /// <summary>
+    /// Works with Export method.
+    /// </summary>
     public class ExportCommandHandler : ServiceCommandHandlerBase
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ExportCommandHandler"/> class.
+        /// </summary>
+        /// <param name="fileCabinetService">Parameter to initialize fileCabinetService.</param>
         public ExportCommandHandler(IFileCabinetService fileCabinetService)
             : base(fileCabinetService)
         {
         }
 
+        /// <summary>
+        /// Perform action.
+        /// </summary>
+        /// <param name="appComandRequest">Parameter to set nextHandler.</param>
+        /// <returns>If nextHandler is null return null, else Handle().</returns>
         public override object Handle(AppComandRequest appComandRequest)
         {
             if (appComandRequest is null)

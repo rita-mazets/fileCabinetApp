@@ -2,11 +2,19 @@
 
 namespace FileCabinetApp.Validators
 {
+    /// <summary>
+    /// Validates firstname.
+    /// </summary>
     public class FirstNameValidator : IRecordValidator
     {
         private int minLenght;
         private int maxLenght;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FirstNameValidator"/> class.
+        /// </summary>
+        /// <param name="minLenght">Parameter to initialize minLenght parameter.</param>
+        /// <param name="maxLenght">Parameter to initialize maxLenght parameter.</param>
         public FirstNameValidator(int minLenght, int maxLenght)
         {
             this.minLenght = minLenght;
